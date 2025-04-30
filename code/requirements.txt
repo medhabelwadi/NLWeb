@@ -1,0 +1,12 @@
+azure-ai-inference>=1.0.0b9
+azure-core>=1.30.0
+azure-search-documents>=11.4.0
+azure-identity>=1.15.0
+anthropic>=0.18.1
+openai>=1.12.0
+google-generativeai>=0.3.2
+jsonschema>=4.19.1
+python-dotenv>=1.0.0
+pymilvus>=1.1.0
+# asyncio is part of standard library, no need to install
+aiohttp>=3.9.1
