@@ -1,19 +1,26 @@
+# Copyright (c) 2025 Microsoft Corporation.
+# Licensed under the MIT License
+
+"""
+This file contains the classes for the different levels of decontextualization. 
+A traditional chatbot, which generates all the output shown to the user
+and hence has all the context.
+In contrast, with NLWeb, the code generates the results shown. In order to keep
+the processing fast (i.e., not blow up the context window for each query) and cheap
+(i.e., keep token count low) we compute a 'decontextualized' statement of the query
+and use that for generating the new round of answers.
+
+WARNING: This code is under development and may undergo changes in future releases.
+Backwards compatibility is not guaranteed at this time.
+"""
+
 import mllm
 from prompt_runner import PromptRunner
 import retriever
 from trim import trim_json
-from prompts import find_prompt, fill_prompt
-from state import NLWebHandlerState
+from prompts import fill_prompt
 import json
-from azure_logger import log, close_logs  # Import our new logging utility
 
-# this file contains the classes for the different levels of decontextualization. 
-# A traditional chatbot, which generates all the output shown to the user
-# and hence has all the context.
-# In contrast, with NLWeb, the code generates the results shown. In order to keep
-# the processing fast (i.e., not blow up the context window for each query) and cheap
-# (i.e., keep token count low) we compute a 'decontextualized' statement of the query
-# and use that for generating the new round of answers.
 
 class NoOpDecontextualizer(PromptRunner):
   
@@ -87,8 +94,7 @@ class ContextUrlDecontextualizer(PrevQueryDecontextualizer):
             (url, schema_json, name, site) = item
             self.context_description = json.dumps(trim_json(schema_json))
             self.handler.context_description = self.context_description
-            prompt = fill_prompt(prompt_str, self.handler)
-            response = await mllm.get_structured_completion_async(prompt, ans_struc, "gpt-4.1")
+            response = await self.run_prompt(self.DECONTEXTUALIZE_QUERY_PROMPT_NAME, "gpt-4.1")
             self.handler.requires_decontextualization = True
             self.handler.abort_fast_track = True
             self.handler.decontextualized_query = response["decontextualized_query"]

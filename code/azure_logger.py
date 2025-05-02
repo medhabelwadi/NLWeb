@@ -1,3 +1,14 @@
+# Copyright (c) 2025 Microsoft Corporation.
+# Licensed under the MIT License
+
+"""
+Logger that redirects output to a temporary file when running on Azure,
+but preserves normal print behavior on local machines.
+
+WARNING: This code is under development and may undergo changes in future releases.
+Backwards compatibility is not guaranteed at this time.
+"""
+
 import os
 import sys
 import time

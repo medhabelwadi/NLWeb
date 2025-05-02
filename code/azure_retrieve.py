@@ -1,21 +1,20 @@
+# Copyright (c) 2025 Microsoft Corporation.
+# Licensed under the MIT License
+
+"""
+This file contains the methods for retrieving items from the Azure AI Search index.
+
+WARNING: This code is under development and may undergo changes in future releases.
+Backwards compatibility is not guaranteed at this time.
+"""
+
 import json
 import os
 import mllm
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient    
-from azure.search.documents.indexes.models import (
-    SearchIndex,
-    SearchField,
-    SearchFieldDataType,
-    SimpleField,
-    SearchableField,
-    VectorSearch,
-    VectorSearchAlgorithmConfiguration,
-    VectorSearchProfile,
-    HnswAlgorithmConfiguration,
-    VectorSearchAlgorithmKind
-)
+
 import time
 from mllm import get_configured_logger
 import sys

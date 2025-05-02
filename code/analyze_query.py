@@ -1,18 +1,16 @@
-import asyncio
-import mllm
-from prompt_runner import PromptRunner
-from prompts import find_prompt, fill_prompt
-from state import NLWebHandlerState
-import time
-from azure_logger import log
-from prompt_runner import PromptRunner
-import utils
+# Copyright (c) 2025 Microsoft Corporation.
+# Licensed under the MIT License
 
-# This file contains the methods for analyzing the query to determine the 
-# type of item being sought, whether there are multiple types of items being
-# sought, etc.
+"""
+This file contains the methods for analyzing the query to determine the 
+type of item being sought, whether there are multiple types of items being
+sought, etc.
 
-# This class is used to detect the type of item being sought.
+WARNING: This code is under development and may undergo changes in future releases.
+Backwards compatibility is not guaranteed at this time.
+"""
+
+from prompt_runner import PromptRunner
 
 class DetectItemType(PromptRunner):
     ITEM_TYPE_PROMPT_NAME = "DetectItemTypePrompt"
