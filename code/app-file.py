@@ -1,10 +1,14 @@
 import asyncio
 import os
+from dotenv import load_dotenv
 from WebServer import fulfill_request, start_server
 
 # This file is the entry point for Azure Web App
 
 def main():
+    # Load environment variables from .env file
+    load_dotenv()
+
     # Get port from Azure environment or use default
     port = int(os.environ.get('PORT', 8000))
     
