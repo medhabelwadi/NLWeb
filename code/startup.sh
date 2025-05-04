@@ -3,8 +3,6 @@
 # Change to the application directory
 cd /home/site/wwwroot
 
-source set_keys.sh
-
 echo "Python version:"
 python --version
 echo "Directory contents:"
@@ -23,7 +21,8 @@ pip install jsonschema>=4.19.1
 pip install python-dotenv>=1.0.0
 pip install aiohttp>=3.9.1
 pip install pymilvus>=1.1.0
+
 # Start the application
 echo "Starting application..."
-source set_keys.sh
+#source set_keys.sh     # Test that this is not needed
 python WebServer.py

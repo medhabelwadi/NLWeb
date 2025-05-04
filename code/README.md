@@ -5,8 +5,8 @@ This project has been adapted to run on Azure Web App. This README provides guid
 ## Project Structure
 
 ```
-project/
-├── app.py                  # Entry point for Azure Web App
+code/
+├── app-file.py             # Entry point for Azure Web App
 ├── WebServer.py            # Modified WebServer for Azure
 ├── baseHandler.py          # Request handler
 ├── state.py                # State management
@@ -51,6 +51,7 @@ project/
 
 3. Install dependencies:
    ```bash
+   cd code
    pip install -r requirements.txt
    ```
 
@@ -63,8 +64,11 @@ project/
 
 6. Run the application locally:
    ```bash
-   python app.py
+   python app-file.py
    ```
+
+7. You can access it via a web browser.  Experiment at http://localhost:8000/html/nlwebsearch.html.  
+
 
 ## Deploying to Azure
 
