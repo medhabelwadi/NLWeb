@@ -1,0 +1,26 @@
+port: 8000
+static_directory: ../../static
+
+# Additional optional configurations
+server:
+  host: 0.0.0.0
+  enable_cors: true
+  max_connections: 100
+  timeout: 30  # seconds
+  
+  # SSL configuration (optional)
+  ssl:
+    enabled: false
+    cert_file_env: SSL_CERT_FILE
+    key_file_env: SSL_KEY_FILE
+    
+  # Logging configuration
+  logging:
+    level: info
+    file: ./logs/webserver.log
+    
+  # Static file serving
+  static:
+    enable_cache: true
+    cache_max_age: 3600  # seconds
+    gzip_enabled: true

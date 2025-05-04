@@ -1,0 +1,33 @@
+preferred_provider: azure_openai
+
+providers:
+  openai:
+    api_key_env: OPENAI_API_KEY
+    embedding_model_env: OPENAI_EMBEDDING_MODEL
+    models:
+      high: gpt-4.1
+      low: gpt-4.1-mini
+
+  anthropic:
+    api_key_env: ANTHROPIC_API_KEY
+    embedding_model_env: ANTHROPIC_EMBEDDING_MODEL
+    models:
+      high: claude-2
+      low: claude-2
+
+  gemini:
+    api_key_env: GCP_PROJECT
+    embedding_model_env: GCP_EMBEDDING_MODEL
+    models:
+      high: chat-bison@001
+      low: chat-bison-lite@001
+
+  azure_openai:
+    api_key_env: AZURE_OPENAI_API_KEY
+    api_endpoint_env: AZURE_OPENAI_ENDPOINT
+    api_version_env: "2024-12-01-preview"
+    embedding_model_env: text-embedding-3-small
+    azure-embedding-api-version: "2024-02-01"
+    models:
+      high: gpt-4.1
+      low: gpt-4.1-mini

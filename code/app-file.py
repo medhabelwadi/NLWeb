@@ -12,7 +12,7 @@ Backwards compatibility is not guaranteed at this time.
 
 import asyncio
 import os
-from WebServer import fulfill_request, start_server
+from webserver.WebServer import fulfill_request, start_server
 
 
 def main():

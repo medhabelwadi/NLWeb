@@ -1,0 +1,11 @@
+preferred_provider: azure_ai_search
+
+providers:
+  azure_ai_search:
+    api_key_env: AZURE_VECTOR_SEARCH_API_KEY
+    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
+    index_name: embeddings1536
+      
+
+  milvus:
+    database_path: ../milvus/milvus_prod.db
