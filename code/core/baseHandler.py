@@ -201,7 +201,7 @@ class NLWebHandler:
         tasks.append(asyncio.create_task(self.decontextualizeQuery().do()))
         tasks.append(asyncio.create_task(relevance_detection.RelevanceDetection(self).do()))
         tasks.append(asyncio.create_task(memory.Memory(self).do()))
-      #  tasks.append(asyncio.create_task(required_info.RequiredInfo(self).do()))
+        tasks.append(asyncio.create_task(required_info.RequiredInfo(self).do()))
         
         try:
             logger.debug(f"Running {len(tasks)} preparation tasks concurrently")

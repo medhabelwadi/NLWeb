@@ -13,7 +13,7 @@ Backwards compatibility is not guaranteed at this time.
 import asyncio
 import os
 from webserver.WebServer import fulfill_request, start_server
-
+from dotenv import load_dotenv
 
 
 def main():
