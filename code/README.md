@@ -59,7 +59,7 @@ code/
 
 5. Run connectivity check:
    ```bash
-   python check_azure_connectivity.py
+   python azure_connectivity.py
    ```
 
 6. Run the application locally:

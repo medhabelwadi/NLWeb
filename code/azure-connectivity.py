@@ -13,26 +13,31 @@ try:
     from openai import OpenAI
     from azure.core.credentials import AzureKeyCredential
     from azure.search.documents import SearchClient
-    from env_loader import load_environment
+    from dotenv import load_dotenv
+    #from env_loader import load_environment
 except ImportError as e:
     print(f"Error importing required libraries: {e}")
     print("Please run: pip install -r requirements.txt")
     sys.exit(1)
 
 # Load environment variables
-load_environment()
+#load_environment()
+load_dotenv()
 
 async def check_search_api():
     """Check Azure AI Search connectivity"""
     print("\nChecking Azure AI Search connectivity...")
     
-    api_key = os.environ.get("AZURE_SEARCH_API_KEY")
+    api_key = os.environ.get("AZURE_VECTOR_SEARCH_API_KEY")
     if not api_key:
-        print("❌ AZURE_SEARCH_API_KEY environment variable not set")
+        print("❌ AZURE_VECTOR_SEARCH_API_KEY environment variable not set")
         return False
     
-    endpoint = os.environ.get("AZURE_SEARCH_ENDPOINT", "https://mahi-vector-search.search.windows.net")
-    
+    endpoint = os.environ.get("AZURE_VECTOR_SEARCH_ENDPOINT")
+    if not endpoint:
+        print("❌ AZURE_VECTOR_SEARCH_ENDPOINT environment variable not set")
+        return False
+
     try:
         credential = AzureKeyCredential(api_key)
         search_client = SearchClient(
@@ -75,14 +80,19 @@ async def check_azure_openai_api():
     if not api_key:
         print("❌ AZURE_OPENAI_API_KEY environment variable not set")
         return False
-    
+
+    endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    if not endpoint:
+        print("❌ AZURE_OPENAI_ENDPOINT environment variable not set")
+        return False
+  
     try:
         from openai import AzureOpenAI
         
         client = AzureOpenAI(
-            azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT", "https://guha-m91xe3zb-westus.cognitiveservices.azure.com/"),
+            azure_endpoint=endpoint,
             api_key=api_key,
-            api_version="2024-02-01"
+            api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")
         )
         
         # Try to list deployments
@@ -101,14 +111,20 @@ async def check_embedding_api():
     if not api_key:
         print("❌ AZURE_EMBEDDING_API_KEY environment variable not set")
         return False
+
+    # Fall back to use same endpoint as Azure OpenAI if not set
+    endpoint = os.environ.get("AZURE_EMBEDDING_ENDPOINT", os.environ.get("AZURE_OPENAI_ENDPOINT"))
+    if not endpoint:
+        print("❌ AZURE_EMBEDDING_ENDPOINT environment variable not set")
+        return False
     
     try:
         from openai import AzureOpenAI
         
         client = AzureOpenAI(
-            azure_endpoint=os.environ.get("AZURE_EMBEDDING_ENDPOINT", "https://guha-m91xe3zb-westus.cognitiveservices.azure.com/"),
+            azure_endpoint=endpoint,
             api_key=api_key,
-            api_version=os.environ.get("AZURE_EMBEDDING_API_VERSION", "2024-02-01")
+            api_version=os.environ.get("AZURE_EMBEDDING_API_VERSION", "2024-10-21")
         )
         
         # Try to create an embedding
