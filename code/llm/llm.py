@@ -11,13 +11,16 @@ Backwards compatibility is not guaranteed at this time.
 
 from typing import Optional, Dict, Any, List
 from config.config import CONFIG
+import asyncio
+import threading
+
 from llm.azure_oai import get_azure_openai_completion
 from llm.openai import get_openai_completion
 from llm.anthropic import get_anthropic_completion
 from llm.gemini import get_gemini_completion
-from utils.logger import get_logger, LogLevel
-import asyncio
-import threading
+from llm.azure_llama import get_llama_completion
+from llm.azure_deepseek import get_deepseek_completion
+from llm.inceptionlabs import get_inceptionlabs_completion
 
 from utils.logging_config_helper import get_configured_logger
 logger = get_configured_logger("llm_wrapper")

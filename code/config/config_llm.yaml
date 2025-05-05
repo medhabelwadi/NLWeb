@@ -31,3 +31,19 @@ providers:
     models:
       high: gpt-4.1
       low: gpt-4.1-mini
+
+  llama_azure:
+    api_key_env: LLAMA_AZURE_API_KEY
+    api_endpoint_env: LLAMA_AZURE_ENDPOINT
+    api_version_env: "2024-12-01-preview"
+    models:
+      high: llama-2-70b
+      low: llama-2-13b
+
+  deepseek_azure:
+    api_key_env: DEEPSEEK_AZURE_API_KEY
+    api_endpoint_env: DEEPSEEK_AZURE_ENDPOINT
+    api_version_env: "2024-12-01-preview"
+    models:
+      high: deepseek-coder-33b
+      low: deepseek-coder-7b

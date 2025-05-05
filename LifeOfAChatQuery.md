@@ -1,5 +1,30 @@
 # Life of a chat query
 
+
+NLWeb aims to make it very simple to provide conversational interfaces to
+websites (or more generally, collections of content) which can be abstracted
+as 'lists of items'. Items maybe recipes, events, products, books, movies, etc.
+NLWeb leverages the fact that most such websites already make their data
+available in a structured form, in a common vocabulary, namely that provided
+by Schema.org. Given the widespread prevalence of schema.org based markup,
+it is not surprising that most LLMs seem to understand schema.org markup very well.
+We exploit this to make it easy to create conversational interfaces.
+
+This document has a brief description of the processing that is done when a User submits
+a query to an NLWeb instance. At a high level, the flow is very similar to
+the processing of a query in Web search. The main difference is that in 'traditional'
+(i.e., pre-llm) search engines, there would be specialized algorithms or special
+purpose models for many of the tasks involved in  the query processing. This
+both made it very expensive to develop robust search tools and also made them
+somewhat limited. Here, we rely on LLMs to perform these tasks.
+
+Depending on the request parameters, control of the results that are returned can
+stay with 'traditional' code, which affords greater control over the returned
+results. In particular, the result can be a list of items, each of which includes
+the data item corresponding to that result, which serves as a hard guarentee against
+hallucination. So, results can be less than most relevant, but a result will never
+be 'made up'.
+
 1. User submits next query in the conversation
 
 2. Multiple parallel calls are made for checking relevancy, decontextualizing query based on conversation history, determining if there are items that should be remembered in memory, etc. Each of these is implemented as a call to an LLM, though alternate implementations are possible. At the end of this, we have a decontextualized query, which we know is relevant to the site, that we have all the information required to answer the query, etc. In some cases, this step might result in the query being broken down into multiple smaller queries. In some cases, the system may return a response (e.g., when more information is required for further processing) and not go any further. 

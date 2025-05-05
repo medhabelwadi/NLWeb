@@ -2,7 +2,7 @@
 # Licensed under the MIT License
 
 """
-Basic config services, including loading config from config_llm.yaml, config_retrieval.yaml, config_webserver.yaml
+Basic config services, including loading config from config_llm.yaml, config_retrieval.yaml, config_webserver.yaml, config_nlweb.yaml
 WARNING: This code is under development and may undergo changes in future releases.
 Backwards compatibility is not guaranteed at this time.
 """
@@ -10,7 +10,7 @@ Backwards compatibility is not guaranteed at this time.
 import os
 import yaml
 from dataclasses import dataclass
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 
 @dataclass
 class ModelConfig:
@@ -32,6 +32,7 @@ class RetrievalProviderConfig:
     api_endpoint: Optional[str] = None
     database_path: Optional[str] = None
     index_name: Optional[str] = None
+    db_type: Optional[str] = None  
 
 @dataclass
 class SSLConfig:
@@ -60,13 +61,18 @@ class ServerConfig:
     logging: Optional[LoggingConfig] = None
     static: Optional[StaticConfig] = None
 
+@dataclass
+class NLWebConfig:
+    sites: List[str]  # List of allowed sites
+
 class AppConfig:
-    config_paths = ["config.yaml", "config_llm.yaml", "config_retrieval.yaml", "config_webserver.yaml"]
+    config_paths = ["config.yaml", "config_llm.yaml", "config_retrieval.yaml", "config_webserver.yaml", "config_nlweb.yaml"]
 
     def __init__(self):
         self.load_llm_config()
         self.load_retrieval_config()
         self.load_webserver_config()
+        self.load_nlweb_config()
 
     def _get_config_value(self, value: Any, default: Any = None) -> Any:
         """
@@ -133,18 +139,21 @@ class AppConfig:
         with open(full_path, "r") as f:
             data = yaml.safe_load(f)
 
-            self.preferred_retrieval_provider: str = data["preferred_provider"]
-            self.retrieval_providers: Dict[str, RetrievalProviderConfig] = {}
+        # Changed from preferred_provider to preferred_endpoint
+            self.preferred_retrieval_endpoint: str = data["preferred_endpoint"]
+            self.retrieval_endpoints: Dict[str, RetrievalProviderConfig] = {}
 
-            for name, cfg in data.get("providers", {}).items():
+            # Changed from providers to endpoints
+            for name, cfg in data.get("endpoints", {}).items():
                 # Use the new method for all configuration values
-                self.retrieval_providers[name] = RetrievalProviderConfig(
+                self.retrieval_endpoints[name] = RetrievalProviderConfig(
                     api_key=self._get_config_value(cfg.get("api_key_env")),
                     api_endpoint=self._get_config_value(cfg.get("api_endpoint_env")),
                     database_path=self._get_config_value(cfg.get("database_path")),
-                    index_name=self._get_config_value(cfg.get("index_name"))
+                    index_name=self._get_config_value(cfg.get("index_name")),
+                    db_type=self._get_config_value(cfg.get("db_type"))  # Add db_type
                 )
-
+    
     def load_webserver_config(self, path: str = "config_webserver.yaml"):
         # Get the directory where this config.py file is located
         config_dir = os.path.dirname(os.path.abspath(__file__))
@@ -166,6 +175,7 @@ class AppConfig:
         # Load basic configurations with the new method
         self.port: int = self._get_config_value(data.get("port"), 8080)
         self.static_directory: str = self._get_config_value(data.get("static_directory"), "./static")
+        self.mode: str = self._get_config_value(data.get("mode"), "production")
         
         # Convert relative paths to absolute paths based on config file location
         if not os.path.isabs(self.static_directory):
@@ -211,6 +221,29 @@ class AppConfig:
             logging=logging_config,
             static=static_config
         )
+
+    def load_nlweb_config(self, path: str = "config_nlweb.yaml"):
+        """Load Natural Language Web configuration."""
+        # Get the directory where this config.py file is located
+        config_dir = os.path.dirname(os.path.abspath(__file__))
+        # Build the full path to the config file
+        full_path = os.path.join(config_dir, path)
+        
+        try:
+            with open(full_path, "r") as f:
+                data = yaml.safe_load(f)
+        except FileNotFoundError:
+            # If config file doesn't exist, use defaults
+            print(f"Warning: {path} not found. Using default NLWeb configuration.")
+            data = {
+                "sites": ""
+            }
+        
+        # Parse the comma-separated sites string into a list
+        sites_str = self._get_config_value(data.get("sites"), "")
+        sites_list = [site.strip() for site in sites_str.split(",") if site.strip()]
+        
+        self.nlweb = NLWebConfig(sites=sites_list)
     
     def get_ssl_cert_path(self) -> Optional[str]:
         """Get the SSL certificate file path."""
@@ -230,6 +263,26 @@ class AppConfig:
                 self.server.ssl.enabled and 
                 self.server.ssl.cert_file is not None and 
                 self.server.ssl.key_file is not None)
+    
+    def is_production_mode(self) -> bool:
+        """Returns True if the system is running in production mode."""
+        return getattr(self, 'mode', 'production').lower() == 'production'
+    
+    def is_development_mode(self) -> bool:
+        """Returns True if the system is running in development mode."""
+        return getattr(self, 'mode', 'production').lower() == 'development'
+    
+    def get_allowed_sites(self) -> List[str]:
+        """Get the list of allowed sites from NLWeb configuration."""
+        return self.nlweb.sites if hasattr(self, 'nlweb') else []
+    
+    def is_site_allowed(self, site: str) -> bool:
+        """Check if a site is in the allowed sites list."""
+        allowed_sites = self.get_allowed_sites()
+        # If no sites are configured, allow all sites
+        if not allowed_sites:
+            return True
+        return site in allowed_sites
 
 # Global singleton
 CONFIG = AppConfig()

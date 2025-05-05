@@ -21,6 +21,9 @@
     import { ChatInterface } from './chat-interface.js';
     import { DropdownInterface } from './dropdown-interface.js';
     
+    // Configuration option to enable/disable database selector
+    const ENABLE_DATABASE_SELECTOR = true;
+    
     // Initialize on DOM load
     document.addEventListener('DOMContentLoaded', () => {
       // Get display mode from URL or use default
@@ -37,6 +40,9 @@
           "list",         // Default generate mode
           false           // Don't append elements yet
         );
+        
+        // Pass configuration for database selector
+        chatInterface.enableDatabaseSelector = ENABLE_DATABASE_SELECTOR;
         
         // Initialize dropdown interface
         const dropdownInterface = new DropdownInterface(

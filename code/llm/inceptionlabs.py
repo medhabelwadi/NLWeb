@@ -24,7 +24,7 @@ HEADERS = {
 
 # ─── Chat Completion (Async) ─────────────────────────────────────────────────────
 
-async def generate_completion(
+async def get_inceptionlabs_completion(
     prompt: str,
     json_schema: Optional[Dict[str, Any]] = None,
     model: str = "mercury-coder-small",
@@ -89,18 +89,3 @@ def clean_json_response(content: str) -> Dict[str, Any]:
     return json.loads(match.group(1))
 
 
-# ─── Example Usage ──────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    prompt_text = "Does the following text contain a person's name? If so, return the name. If not, return 'No name found.'. Text: 'The name of the person is John Doe.'. Return only the name or 'No name found.'."
-    ans_schema = {
-        "type": "object",
-        "properties": {
-            "name": {"type": "string"},
-            "found": {"type": "boolean"}
-        },
-    }   
-    # 1) non-streaming call:
-    answer = asyncio.run(generate_completion(prompt_text, ans_schema))
-    print("Full response:
-", answer)

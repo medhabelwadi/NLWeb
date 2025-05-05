@@ -66,7 +66,7 @@ export class ChatInterface {
       this.messagesArea.innerHTML = '';
     }
     this.messages = [];
-    this.prevMessages = this.prevMessages || [];
+    this.prevMessages =  [];
     this.currentMessage = [];
     this.currentItems = [];
     this.itemToRemember = [];
@@ -243,6 +243,7 @@ export class ChatInterface {
     try {
       console.log("generate_mode", this.generate_mode);
       const selectedSite = (this.site || (this.siteSelect && this.siteSelect.value));
+      const selectedDatabase = this.database || (this.dbSelect && this.dbSelect.value) || 'azure_ai_search_1';
       const prev = JSON.stringify(this.prevMessages);
       const generate_mode = this.generate_mode;
       const context_url = this.context_url && this.context_url.value ? this.context_url.value : '';
@@ -257,6 +258,7 @@ export class ChatInterface {
       queryParams.append('query_id', queryId);
       queryParams.append('query', message);
       queryParams.append('site', selectedSite);
+      queryParams.append('db', selectedDatabase);
       queryParams.append('generate_mode', generate_mode);
       queryParams.append('prev', prev);
       queryParams.append('item_to_remember', this.itemToRemember || '');
@@ -274,6 +276,7 @@ export class ChatInterface {
       console.error('Error fetching response:', error);
     }
   }
+  
 
   /**
    * Handles the first message by removing loading dots

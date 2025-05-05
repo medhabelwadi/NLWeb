@@ -262,7 +262,7 @@
         <div id="standard-tab" class="tab-content active">
             <div class="container">
                 <div class="panel left-panel">
-                    <h2>Standard MCP Request</h2>
+                    <h2>MCP Request</h2>
                     <div class="form-group">
                         <label for="serverUrl">Server URL:</label>
                         <input type="text" id="serverUrl" value="http://localhost:8000/mcp" placeholder="http://localhost:8000/mcp">
@@ -270,12 +270,12 @@
                     
                     <div class="form-group">
                         <label for="query">Query:</label>
-                        <textarea id="query" placeholder="Enter your question here">What is the capital of France?</textarea>
+                        <textarea id="query" placeholder="Enter your question here">Robot movies for kids</textarea>
                     </div>
                     
                     <div class="form-group">
                         <label for="site">Site (optional):</label>
-                        <input type="text" id="site" placeholder="E.g., wikipedia.org">
+                        <input type="text" id="site" placeholder="">
                     </div>
                     
                     <div class="form-group">
@@ -317,12 +317,12 @@
                     
                     <div class="form-group">
                         <label for="streamingQuery">Query:</label>
-                        <textarea id="streamingQuery" placeholder="Enter your question here">Tell me about quantum computing</textarea>
+                        <textarea id="streamingQuery" placeholder="Enter your question here">Movies that present AI in a positive light</textarea>
                     </div>
                     
                     <div class="form-group">
                         <label for="streamingSite">Site (optional):</label>
-                        <input type="text" id="streamingSite" placeholder="E.g., wikipedia.org">
+                        <input type="text" id="streamingSite" placeholder="scifi_movies">
                     </div>
                     
                     <div class="form-group">
@@ -359,19 +359,26 @@
                     <h2>Example Queries</h2>
                     <p>Click on an example to load it into the form:</p>
                     
-                    <h3>Standard Queries</h3>
+                    <h3>Non-streaming Queries</h3>
                     <ul class="examples-list">
-                        <li onclick="loadStandardExample('What is the capital of France?')">Simple question: What is the capital of France?</li>
-                        <li onclick="loadStandardExample('Tell me about the history of computers', 'history.com')">With site parameter: Computer history (history.com)</li>
-                        <li onclick="loadStandardExample('Tell me more about Paris', '', 'What is the capital of France?')">With previous query: More about Paris</li>
-                        <li onclick="loadStandardExample('Summarize this page', '', '', 'https://en.wikipedia.org/wiki/Artificial_intelligence')">With context URL: Summarize Wikipedia AI page</li>
+                        <li onclick="loadStandardExample('Who was the director of Blade Runner', 'scifi_movies')">
+                            Who was the director of Blade Runner</li>
+                        <li onclick="loadStandardExample('Show me movies that portray AI in a good light', 'scifi_movies')">
+                            Show me movies that portray AI in a good light</li>
+                        <li onclick="loadStandardExample('Movies about cooking', 'scifi_movies')">
+                            Movies about cooking</li>
+                        <li onclick="loadStandardExample('Movies that show friendship between robots and children', 'scifi_movies')">
+                            Movies that show friendship between robots and children</li>
                     </ul>
                     
                     <h3>Streaming Queries</h3>
                     <ul class="examples-list">
-                        <li onclick="loadStreamingExample('Explain how quantum computers work')">Streaming: Quantum computers explanation</li>
-                        <li onclick="loadStreamingExample('Write a short story about a robot learning to paint')">Streaming: Creative writing - Robot painter</li>
-                        <li onclick="loadStreamingExample('What are the major challenges in AI safety?', 'research.org')">Streaming with site: AI safety challenges</li>
+                        <li onclick="loadStreamingExample('Movies that have been inspired by Star Trek', 'scifi_movies')">Streaming: Movies that have been inspired by Star Trek</li>
+                        <li onclick="loadStreamingExample('Movies with characters like Spock and Data', 'scifi_movies')">Streaming: Characters like Spock and Data</li>
+                        <li onclick="loadStreamingExample('I mean in movies other than the Star Trek movies', 'scifi_movies', 
+                        '[\'Characters like Spock and Data\', 
+                            \'Movies that have been inspired by Star Trek\']')">
+                            Streaming: I mean in movies other than the Star Trek movies</li>
                     </ul>
                 </div>
                 
@@ -396,16 +403,28 @@
         <div id="about-tab" class="tab-content">
             <div class="container">
                 <div class="panel left-panel">
-                    <h2>About MCP</h2>
-                    <p>MCP (Mediated Communication Protocol) is a standardized protocol for interacting with AI assistants and tools.</p>
-                    <p>This test interface allows you to experiment with MCP requests to your server, testing both standard and streaming responses.</p>
+                    <h2>About NLWeb andMCP</h2>
+                    <p>NLWeb aims to bring AI powered conversational search to a broad range of
+                        content sources, especially websites. NLWeb is designed to give agency into all players in the AI ecosystem, 
+                        especially content creators. A more balanced ecosystem is one where content creators
+                        have greater control over their content.
+                    </p>
+                    <p>MCP (Mediated Communication Protocol) is an emerging protocol for Chatbots and AI
+                        assistants to interact with tools. Every NLWeb instance is also an MCP server, which supports one method,
+                        <code>ask</code>, which is used to ask a website a question in natural language. The returned response
+                        is in schema.org, a widely used vocabulary for describing web data.
+                    </p>
+                    
+                    <p>This test interface allows you to experiment with MCP requests to your NLWeb server, 
+                        testing both standard and streaming responses.</p>
                     
                     <h3>Request Format</h3>
                     <p>An MCP request includes:</p>
                     <ul>
                         <li><strong>function_call</strong>: The function to invoke</li>
-                        <li><strong>name</strong>: Name of the function (e.g., "ask")</li>
-                        <li><strong>arguments</strong>: JSON string with parameters</li>
+                        <li><strong>name</strong>:ask</li>
+                        <li><strong>arguments</strong>: JSON string with parameters. All parameters except 'query' and 'site' are optional. Site may be 'all' to search all the 
+                            sites in this NLWeb instance.</li>
                     </ul>
                     
                     <h3>Response Format</h3>
@@ -413,7 +432,7 @@
                     <ul>
                         <li><strong>type</strong>: "function_response"</li>
                         <li><strong>status</strong>: "success" or "error"</li>
-                        <li><strong>response</strong>: The answer from the tool</li>
+                        <li><strong>response</strong>: The answer from the NLWeb instance, in schema.org format</li>
                     </ul>
                     
                     <p>Streaming responses include:</p>
@@ -427,7 +446,7 @@
                 <div class="splitter" id="about-splitter"></div>
                 
                 <div class="panel right-panel">
-                    <h2>Features</h2>
+                   
                     <p>This test interface provides:</p>
                     <ul>
                         <li><strong>JSON Tree Viewer</strong>: Interactive expandable/collapsible tree view for JSON responses</li>
@@ -444,7 +463,7 @@
                         <li>Click on the toggles (+ / -) in the tree view to expand or collapse JSON nodes</li>
                         <li>For local testing, ensure CORS is properly configured on your server</li>
                         <li>The streaming tab formats partial responses as they arrive</li>
-                        <li>All parameters except 'query' are optional</li>
+                        
                     </ul>
                 </div>
             </div>

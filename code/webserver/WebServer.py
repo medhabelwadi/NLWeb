@@ -158,7 +158,6 @@ async def handle_client(reader, writer, fulfill_request):
         # Call the user-provided fulfill_request function with streaming capabilities
         if connection_alive:
             try:
-              
                 await fulfill_request(
                     method=method,
                     path=urllib.parse.unquote(path),
@@ -196,7 +195,53 @@ async def handle_client(reader, writer, fulfill_request):
             print(f"[{request_id}] Connection closed")
         except Exception as e:
             print(f"[{request_id}] Error closing connection: {str(e)}")
+
+def handle_site_parameter(query_params):
+    """
+    Handle site parameter with configuration validation.
+    
+    Args:
+        query_params (dict): Query parameters from request
+        
+    Returns:
+        dict: Modified query parameters with valid site parameter(s)
+    """
+    # Create a copy of query_params to avoid modifying the original
+    result_params = query_params.copy()
+    
+    # Get allowed sites from config
+    allowed_sites = CONFIG.get_allowed_sites()
+    
+    # Check if site parameter exists in query params
+    if "site" in query_params:
+        sites = query_params["site"]
+        if isinstance(sites, list):
+            # Validate each site
+            valid_sites = []
+            for site in sites:
+                if CONFIG.is_site_allowed(site):
+                    valid_sites.append(site)
+                else:
+                    print(f"Warning: Site '{site}' is not in allowed sites list")
             
+            if valid_sites:
+                result_params["site"] = valid_sites
+            else:
+                # No valid sites provided, use default from config
+                result_params["site"] = allowed_sites
+        else:
+            # Single site
+            if CONFIG.is_site_allowed(sites):
+                result_params["site"] = [sites]
+            else:
+                print(f"Warning: Site '{sites}' is not in allowed sites list")
+                result_params["site"] = allowed_sites
+    else:
+        # No site parameter provided, use all allowed sites from config
+        result_params["site"] = allowed_sites
+    
+    return result_params
+
 async def start_server(host=None, port=None, fulfill_request=None, use_https=False, 
                  ssl_cert_file=None, ssl_key_file=None):
     """
@@ -303,11 +348,14 @@ async def fulfill_request(method, path, headers, query_params, body, send_respon
             await handle_mcp_request(query_params, body, send_response, send_chunk, streaming=use_streaming)
             return
         elif (path.find("ask") != -1):
+            # Handle site parameter validation for ask endpoint
+            validated_query_params = handle_site_parameter(query_params)
+            
             if (not streaming):
                 if (generate_mode == "generate"):
-                    retval = await GenerateAnswer(query_params, None).runQuery()
+                    retval = await GenerateAnswer(validated_query_params, None).runQuery()
                 else:
-                    retval = await NLWebHandler(query_params, None).runQuery()
+                    retval = await NLWebHandler(validated_query_params, None).runQuery()
                 await send_response(200, {'Content-Type': 'application/json'})
                 await send_chunk(json.dumps(retval), end_response=True)
                 return
@@ -329,8 +377,8 @@ async def fulfill_request(method, path, headers, query_params, body, send_respon
                 # Create wrapper for chunk sending
                 send_chunk_wrapper = SendChunkWrapper(send_chunk)
                 
-                # Handle the request
-                hr = HandleRequest(method, path, headers, query_params, 
+                # Handle the request with validated query parameters
+                hr = HandleRequest(method, path, headers, validated_query_params, 
                                    body, send_response, send_chunk_wrapper, generate_mode)
                 await hr.do_GET()
         else:
