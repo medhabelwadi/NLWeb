@@ -9,7 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-
+.DS_Store
+code/.env
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -400,5 +401,4 @@ FodyWeavers.xsd
 *.sln.iml
 code/set_keys.sh
 data/sites/scifi_movies/embeddings/scifi_movies.txt
-.DS_Store
-code/.env
+
