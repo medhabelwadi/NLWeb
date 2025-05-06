@@ -76,8 +76,13 @@ python app-file.py
 ### Option 1: Azure Portal Deployment
 
 1. Create a [Web App in Azure Portal](https://portal.azure.com/?feature.msaljs=true#view/WebsitesExtension/AppServiceWebAppCreateV3Blade):
-   - Choose Python 3.9 as the runtime stack
+   - Create a new resource group and instance name.  
+   - Publish: Code
+   - Choose Python 3.13 as the runtime stack
    - Select Linux as the operating system
+   - Select "East US 2" or "Sweden Central" as the region
+   - Select "Premium V3 P1V3 (195 minimum ACU/vCPU, 8 GB memory, 2 vCPU)" as the pricing plan
+   - No database is needed.  
 
 2. Set up deployment source:
    - Choose GitHub or Azure DevOps
@@ -88,11 +93,15 @@ python app-file.py
    - Add all the environment variables from `.env.template`
    - Set `WEBSITE_RUN_FROM_PACKAGE=1`
    - Set `SCM_DO_BUILD_DURING_DEPLOYMENT=true`
+   - Don't forget to click "Apply" after all app settings have beeen added to save your changes!  
 
-4. Configure startup command:
+4. Configure startup command to:
    ```
    startup.sh
    ```
+   This can be found under "Settings" in the "Configuration" section.  It's in the default "General settings" tab.  Again, don't forget to click "Save" when you are done to save your changes.  
+
+   ![Startup Command can be found in the Configuration pane under the General settings tab.](images/StartupCommand.jpg)
 
 ### Option 2: Azure CLI Deployment
 
