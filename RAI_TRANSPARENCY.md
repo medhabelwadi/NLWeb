@@ -6,7 +6,7 @@ NLWeb, or ‘Natural Language Web,’ allows users to easily add natural languag
 
 ## What can NLWeb do? 
 
-When a site uses NLWeb, the end-user is able to query the site to search in natural language and return relevant items, which you know exist because the results are returned from the database (e.g., they are not LLM generated restuls). Tranditional keyword search is unable to understand the complex and potentially multi-turn queries for which NLWeb is able to quickly return relevant results and have a conversation with you in order to refine them.
+When a site uses NLWeb, the end-user is able to query the site to search in natural language and return relevant items, which you know exist because the results are returned from the database (e.g., they are not LLM generated results). Traditional keyword search is unable to understand the complex and potentially multi-turn queries for which NLWeb is able to quickly return relevant results and have a conversation with you in order to refine them.
 
 ## What is NLWeb’s intended use(s)?
 
