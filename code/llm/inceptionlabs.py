@@ -17,11 +17,6 @@ def get_api_key() -> str:
         raise RuntimeError("INCEPTION_API_KEY environment variable is not set")
     return key
 
-HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {get_api_key()}",
-}
-
 # ─── Chat Completion (Async) ─────────────────────────────────────────────────────
 
 async def get_inceptionlabs_completion(
@@ -49,6 +44,11 @@ async def get_inceptionlabs_completion(
     """
     
     messages = []
+
+    HEADERS = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {get_api_key()}",
+    }
     
     if json_schema:
         # Add system message to enforce JSON schema
