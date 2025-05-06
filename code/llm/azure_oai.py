@@ -2,7 +2,6 @@
 # Licensed under the MIT License
 
 """
-
 WARNING: This code is under development and may undergo changes in future releases.
 Backwards compatibility is not guaranteed at this time.
 
@@ -11,68 +10,88 @@ Code for calling Azure Open AI endpoints.
 
 import json
 from openai import AsyncAzureOpenAI
-import os
 from config.config import CONFIG
-from utils.logging_config_helper import get_configured_logger
+from utils.logger import LogLevel, get_logger
 import asyncio
 import threading
 
-logger = get_configured_logger("azure_openai")
+# Initialize logger using your logger utility
+logger = get_logger("azure_openai")
 
 # Global client with thread-safe initialization
 _client_lock = threading.Lock()
 azure_openai_client = None
 
 def get_azure_openai_endpoint():
-    # Get endpoint from config - now handles both direct values and env vars
+    """Get the Azure OpenAI endpoint from configuration."""
     logger.debug("Retrieving Azure OpenAI endpoint from config")
     provider_config = CONFIG.providers.get("azure_openai")
     if provider_config and provider_config.endpoint:
         endpoint = provider_config.endpoint
         if endpoint:
-            endpoint = endpoint.strip('"')  # Adding the strip in case the value has quotes in it
+            endpoint = endpoint.strip('"')  # Remove quotes if present
             logger.debug(f"Azure OpenAI endpoint found: {endpoint[:20]}...")  # Log first 20 chars only
             return endpoint
     logger.warning("Azure OpenAI endpoint not found in config")
     return None
 
 def get_azure_openai_api_key():
-    # Get API key from config - now handles both direct values and env vars
+    """Get the Azure OpenAI API key from configuration."""
     logger.debug("Retrieving Azure OpenAI API key from config")
     provider_config = CONFIG.providers.get("azure_openai")
     if provider_config and provider_config.api_key:
         api_key = provider_config.api_key
         if api_key:
-            api_key = api_key.strip('"')  # Adding the strip in case the value has quotes in it
+            api_key = api_key.strip('"')  # Remove quotes if present
             logger.debug("Azure OpenAI API key found")  # Never log actual API key
             return api_key
     logger.warning("Azure OpenAI API key not found in config")
     return None
 
 def get_azure_openai_api_version():
-    # Get API version from config - now handles both direct values and env vars
+    """Get the Azure OpenAI API version from configuration."""
     logger.debug("Retrieving Azure OpenAI API version from config")
     provider_config = CONFIG.providers.get("azure_openai")
     if provider_config and provider_config.api_version:
-        logger.debug(f"Azure OpenAI API version: {provider_config.api_version}")
-        return provider_config.api_version
-    logger.warning("Azure OpenAI API version not found in config")
-    return None
+        api_version = provider_config.api_version
+        logger.debug(f"Azure OpenAI API version: {api_version}")
+        return api_version
+    # Default value if not found in config
+    default_version = "2024-02-01"
+    logger.warning(f"Azure OpenAI API version not found in config, using default: {default_version}")
+    return default_version
 
 def get_azure_openai_embedding_model():
-    # Get embedding model from config - now handles both direct values and env vars
+    """Get the Azure OpenAI embedding model from configuration."""
     logger.debug("Retrieving Azure OpenAI embedding model from config")
     provider_config = CONFIG.providers.get("azure_openai")
     if provider_config and provider_config.embedding_model:
         model = provider_config.embedding_model
         if model:
-            model = model.strip('"')  # Adding the strip in case the value has quotes in it
+            model = model.strip('"')  # Remove quotes if present
             logger.debug(f"Azure OpenAI embedding model: {model}")
             return model
-    logger.warning("Azure OpenAI embedding model not found in config")
-    return None
+    # Default value if not found in config
+    default_model = "text-embedding-3-small"
+    logger.warning(f"Azure OpenAI embedding model not found in config, using default: {default_model}")
+    return default_model
+
+def get_model_from_config(high_tier=False):
+    """Get the appropriate model from configuration based on tier."""
+    logger.debug(f"Retrieving Azure OpenAI {'high' if high_tier else 'low'} tier model from config")
+    provider_config = CONFIG.providers.get("azure_openai")
+    if provider_config and provider_config.models:
+        model_name = provider_config.models.high if high_tier else provider_config.models.low
+        if model_name:
+            logger.debug(f"Model found: {model_name}")
+            return model_name
+    # Default values if not found
+    default_model = "gpt-4.1" if high_tier else "gpt-4.1-mini"
+    logger.warning(f"Model not found in config, using default: {default_model}")
+    return default_model
 
 def get_azure_openai_client():
+    """Get or initialize the Azure OpenAI client."""
     global azure_openai_client
     with _client_lock:  # Thread-safe client initialization
         if azure_openai_client is None:
@@ -109,6 +128,7 @@ def get_azure_openai_client():
     return azure_openai_client
 
 async def get_azure_embedding(text):
+    """Generate embeddings using Azure OpenAI."""
     logger.info("Getting Azure embedding")
     logger.debug(f"Text length: {len(text)} characters")
     
@@ -143,14 +163,17 @@ async def get_azure_embedding(text):
         )
         raise
 
-
 def clean_azure_openai_response(content):
+    """Clean and extract JSON content from OpenAI response."""
     logger.debug("Cleaning Azure OpenAI response")
     response_text = content.strip()
-    response_text = content.replace('```json', '').replace('```', '').strip()
+    # Remove markdown code block indicators if present
+    response_text = response_text.replace('```json', '').replace('```', '').strip()
             
+    # Find the JSON object within the response
     start_idx = response_text.find('{')
     end_idx = response_text.rfind('}') + 1
+    
     if start_idx == -1 or end_idx == 0:
         error_msg = "No valid JSON object found in response"
         logger.error(error_msg)
@@ -168,12 +191,27 @@ def clean_azure_openai_response(content):
         logger.debug(f"JSON string: {json_str[:200]}...")  # Log first 200 chars
         raise ValueError(f"Failed to parse response as JSON: {e}")
 
-
-async def get_azure_openai_completion(prompt, json_schema, model="gpt-4.1-mini", temperature=0.7, timeout=8):
-    logger.info(f"Getting Azure OpenAI completion with model: {model}")
+async def get_azure_openai_completion(prompt, json_schema, model=None, high_tier=False, temperature=0.7, timeout=8):
+    """
+    Get completion from Azure OpenAI.
+    
+    Args:
+        prompt: The prompt to send to the model
+        json_schema: JSON schema for the expected response
+        model: Specific model to use (overrides configuration)
+        high_tier: Whether to use the high-tier model from config
+        temperature: Model temperature
+        timeout: Request timeout in seconds
+        
+    Returns:
+        Parsed JSON response
+    """
+    # Use specified model or get from config based on tier
+    model_to_use = model if model else get_model_from_config(high_tier)
+    
+    logger.info(f"Getting Azure OpenAI completion with model: {model_to_use}")
     logger.debug(f"Temperature: {temperature}, Timeout: {timeout}s")
     logger.debug(f"Prompt length: {len(prompt)} chars")
-    logger.debug(f"Schema: {json_schema}")
     
     client = get_azure_openai_client()
     system_prompt = f"""Provide a response that matches this JSON schema: {json.dumps(json_schema)}"""
@@ -191,7 +229,7 @@ async def get_azure_openai_completion(prompt, json_schema, model="gpt-4.1-mini",
                 stream=False,
                 presence_penalty=0.0,
                 frequency_penalty=0.0,
-                model=model
+                model=model_to_use
             ),
             timeout=timeout
         )
@@ -212,7 +250,7 @@ async def get_azure_openai_completion(prompt, json_schema, model="gpt-4.1-mini",
             LogLevel.ERROR,
             "Azure OpenAI completion failed",
             {
-                "model": model_name,
+                "model": model_to_use,
                 "temperature": temperature,
                 "timeout": timeout,
                 "prompt_length": len(prompt),

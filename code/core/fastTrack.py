@@ -25,7 +25,7 @@ class FastTrack:
         self.handler = handler
         logger.debug("FastTrack initialized")
 
-    def is_fastTack_eligible(self):
+    def is_fastTrack_eligible(self):
         """Check if query is eligible for fast track processing"""
         if (self.handler.context_url != ''):
             logger.debug("Fast track not eligible: context_url present")
@@ -38,7 +38,7 @@ class FastTrack:
         
     async def do(self):
         """Execute fast track processing"""
-        if (not self.is_fastTack_eligible()):
+        if (not self.is_fastTrack_eligible()):
             logger.info("Fast track processing skipped - not eligible")
             return
         
