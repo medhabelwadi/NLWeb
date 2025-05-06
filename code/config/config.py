@@ -118,7 +118,7 @@ class AppConfig:
                 api_endpoint = self._get_config_value(cfg.get("api_endpoint_env"))
                 api_version = self._get_config_value(cfg.get("api_version_env"))
                 embedding_model = self._get_config_value(cfg.get("embedding_model_env"))
-                azure_embedding_api_version = self._get_config_value(cfg.get("azure-embedding-api-version"))
+                azure_embedding_api_version = self._get_config_value(cfg.get("azure_embedding_api_version"))
 
                 # Create the provider config
                 self.providers[name] = ProviderConfig(

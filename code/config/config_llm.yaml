@@ -27,7 +27,7 @@ providers:
     api_endpoint_env: AZURE_OPENAI_ENDPOINT
     api_version_env: "2024-12-01-preview"
     embedding_model_env: text-embedding-3-small
-    azure-embedding-api-version: "2024-02-01"
+    azure_embedding_api_version: "2024-10-21"
     models:
       high: gpt-4.1
       low: gpt-4.1-mini
