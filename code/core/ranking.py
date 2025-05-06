@@ -54,7 +54,7 @@ The user's question is: {request.query}. The item's description is {item.descrip
         ll = len(items)
         self.ranking_type_str = "FAST_TRACK" if ranking_type == self.FAST_TRACK else "REGULAR_TRACK"
         logger.info(f"Initializing Ranking with {ll} items, type: {self.ranking_type_str}")
-        print(f"Ranking {ll} items of type {self.ranking_type_str}")
+        logger.info(f"Ranking {ll} items of type {self.ranking_type_str}")
         self.handler = handler
         self.items = items
         self.num_results_sent = 0
