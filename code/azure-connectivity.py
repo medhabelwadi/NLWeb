@@ -13,40 +13,16 @@ try:
     from openai import OpenAI, AzureOpenAI
     from azure.core.credentials import AzureKeyCredential
     from azure.search.documents import SearchClient
-<<<<<<< HEAD
-    from dotenv import load_dotenv
-    #from env_loader import load_environment
-=======
     from config import CONFIG
->>>>>>> 2919691c974ae8ede32a58af496dd3d1c4a2ea55
 except ImportError as e:
     print(f"Error importing required libraries: {e}")
     print("Please run: pip install -r requirements.txt")
     sys.exit(1)
 
-<<<<<<< HEAD
-# Load environment variables
-#load_environment()
-load_dotenv()
-
-=======
->>>>>>> 2919691c974ae8ede32a58af496dd3d1c4a2ea55
 async def check_search_api():
     """Check Azure AI Search connectivity"""
     print("\nChecking Azure AI Search connectivity...")
     
-<<<<<<< HEAD
-    api_key = os.environ.get("AZURE_VECTOR_SEARCH_API_KEY")
-    if not api_key:
-        print("❌ AZURE_VECTOR_SEARCH_API_KEY environment variable not set")
-        return False
-    
-    endpoint = os.environ.get("AZURE_VECTOR_SEARCH_ENDPOINT")
-    if not endpoint:
-        print("❌ AZURE_VECTOR_SEARCH_ENDPOINT environment variable not set")
-        return False
-
-=======
     # Get search configuration from CONFIG
     preferred_endpoint = CONFIG.preferred_retrieval_endpoint
     if preferred_endpoint not in CONFIG.retrieval_endpoints:
@@ -61,9 +37,12 @@ async def check_search_api():
         return False
     
     endpoint = retrieval_config.api_endpoint
+    if not endpoint:
+        print("❌ Endpoint for Azure AI Search not configured")
+        return False
+    
     index_name = retrieval_config.index_name or "embeddings1536"
     
->>>>>>> 2919691c974ae8ede32a58af496dd3d1c4a2ea55
     try:
         credential = AzureKeyCredential(api_key)
         search_client = SearchClient(
@@ -117,7 +96,7 @@ async def check_azure_openai_api():
     azure_config = CONFIG.providers["azure"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
-    api_version = azure_config.api_version or "2024-02-01"
+    api_version = azure_config.api_version or "2024-10-21"
     
     if not api_key:
         print("❌ API key for Azure OpenAI not configured")
@@ -127,11 +106,6 @@ async def check_azure_openai_api():
         print("❌ Endpoint for Azure OpenAI not configured")
         return False
 
-    endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-    if not endpoint:
-        print("❌ AZURE_OPENAI_ENDPOINT environment variable not set")
-        return False
-  
     try:
         client = AzureOpenAI(
             azure_endpoint=endpoint,
@@ -155,17 +129,11 @@ async def check_embedding_api():
     if "azure" not in CONFIG.providers:
         print("❌ Azure provider not configured")
         return False
-
-    # Fall back to use same endpoint as Azure OpenAI if not set
-    endpoint = os.environ.get("AZURE_EMBEDDING_ENDPOINT", os.environ.get("AZURE_OPENAI_ENDPOINT"))
-    if not endpoint:
-        print("❌ AZURE_EMBEDDING_ENDPOINT environment variable not set")
-        return False
     
     azure_config = CONFIG.providers["azure"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
-    api_version = azure_config.azure_embedding_api_version or "2024-02-01"
+    api_version = azure_config.azure_embedding_api_version or "2024-10-21"
     embedding_model = azure_config.embedding_model
     
     if not api_key:
@@ -184,11 +152,7 @@ async def check_embedding_api():
         client = AzureOpenAI(
             azure_endpoint=endpoint,
             api_key=api_key,
-<<<<<<< HEAD
-            api_version=os.environ.get("AZURE_EMBEDDING_API_VERSION", "2024-10-21")
-=======
             api_version=api_version
->>>>>>> 2919691c974ae8ede32a58af496dd3d1c4a2ea55
         )
         
         # Try to create an embedding
