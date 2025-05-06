@@ -68,7 +68,7 @@ The user's question is: {request.query}. The item's description is {item.descrip
             return
         if (self.ranking_type == Ranking.FAST_TRACK and self.handler.abort_fast_track_event.is_set()):
             logger.info("Fast track aborted, skipping item ranking")
-            print("Aborting fast track")
+            logger.info("Aborting fast track")
             return
         try:
             logger.debug(f"Ranking item: {name} from {site}")
