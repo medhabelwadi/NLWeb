@@ -45,7 +45,7 @@ def get_azure_openai_api_version():
         api_version = provider_config.api_version
         return api_version
     # Default value if not found in config
-    default_version = "2024-02-01"
+    default_version = "2024-10-21"
     return default_version
 
 def get_azure_openai_embedding_model():

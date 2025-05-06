@@ -10,6 +10,7 @@ Backwards compatibility is not guaranteed at this time.
 import os
 import yaml
 from dataclasses import dataclass
+from dotenv import load_dotenv
 from typing import Dict, Optional, Any, List
 
 @dataclass
@@ -69,6 +70,7 @@ class AppConfig:
     config_paths = ["config.yaml", "config_llm.yaml", "config_retrieval.yaml", "config_webserver.yaml", "config_nlweb.yaml"]
 
     def __init__(self):
+        load_dotenv()
         self.load_llm_config()
         self.load_retrieval_config()
         self.load_webserver_config()
@@ -118,7 +120,7 @@ class AppConfig:
                 api_endpoint = self._get_config_value(cfg.get("api_endpoint_env"))
                 api_version = self._get_config_value(cfg.get("api_version_env"))
                 embedding_model = self._get_config_value(cfg.get("embedding_model_env"))
-                azure_embedding_api_version = self._get_config_value(cfg.get("azure-embedding-api-version"))
+                azure_embedding_api_version = self._get_config_value(cfg.get("azure_embedding_api_version"))
 
                 # Create the provider config
                 self.providers[name] = ProviderConfig(

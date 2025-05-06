@@ -13,7 +13,7 @@ try:
     from openai import OpenAI, AzureOpenAI
     from azure.core.credentials import AzureKeyCredential
     from azure.search.documents import SearchClient
-    from config import CONFIG
+    from config.config import CONFIG
 except ImportError as e:
     print(f"Error importing required libraries: {e}")
     print("Please run: pip install -r requirements.txt")
@@ -89,11 +89,11 @@ async def check_azure_openai_api():
     print("\nChecking Azure OpenAI API connectivity...")
     
     # Check if Azure OpenAI is configured
-    if "azure" not in CONFIG.providers:
+    if "azure_openai" not in CONFIG.providers:
         print("❌ Azure OpenAI provider not configured")
         return False
     
-    azure_config = CONFIG.providers["azure"]
+    azure_config = CONFIG.providers["azure_openai"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
     api_version = azure_config.api_version or "2024-10-21"
@@ -126,11 +126,11 @@ async def check_embedding_api():
     print("\nChecking Azure Embedding API connectivity...")
     
     # Check if Azure is configured
-    if "azure" not in CONFIG.providers:
+    if "azure_openai" not in CONFIG.providers:
         print("❌ Azure provider not configured")
         return False
     
-    azure_config = CONFIG.providers["azure"]
+    azure_config = CONFIG.providers["azure_openai"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
     api_version = azure_config.azure_embedding_api_version or "2024-10-21"
@@ -182,7 +182,7 @@ async def main():
     # Create and run all checks simultaneously
     tasks = [
         check_search_api(),
-        check_openai_api(),
+        #check_openai_api(),
         check_azure_openai_api(),
         check_embedding_api()
     ]
