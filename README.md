@@ -75,7 +75,7 @@ python app-file.py
 
 ### Option 1: Azure Portal Deployment
 
-1. Create a Web App in Azure Portal:
+1. Create a [Web App in Azure Portal](https://portal.azure.com/?feature.msaljs=true#view/WebsitesExtension/AppServiceWebAppCreateV3Blade):
    - Choose Python 3.9 as the runtime stack
    - Select Linux as the operating system
 
