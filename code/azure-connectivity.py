@@ -37,6 +37,10 @@ async def check_search_api():
         return False
     
     endpoint = retrieval_config.api_endpoint
+    if not endpoint:
+        print("❌ Endpoint for Azure AI Search not configured")
+        return False
+    
     index_name = retrieval_config.index_name or "embeddings1536"
     
     try:
@@ -92,7 +96,7 @@ async def check_azure_openai_api():
     azure_config = CONFIG.providers["azure"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
-    api_version = azure_config.api_version or "2024-02-01"
+    api_version = azure_config.api_version or "2024-10-21"
     
     if not api_key:
         print("❌ API key for Azure OpenAI not configured")
@@ -101,7 +105,7 @@ async def check_azure_openai_api():
     if not endpoint:
         print("❌ Endpoint for Azure OpenAI not configured")
         return False
-    
+
     try:
         client = AzureOpenAI(
             azure_endpoint=endpoint,
@@ -129,7 +133,7 @@ async def check_embedding_api():
     azure_config = CONFIG.providers["azure"]
     api_key = azure_config.api_key
     endpoint = azure_config.endpoint
-    api_version = azure_config.azure_embedding_api_version or "2024-02-01"
+    api_version = azure_config.azure_embedding_api_version or "2024-10-21"
     embedding_model = azure_config.embedding_model
     
     if not api_key:
