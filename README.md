@@ -50,6 +50,10 @@ When you get to the "[Deploy a model](https://learn.microsoft.com/en-us/azure/ai
 
 6. Setup your service API keys.  Copy the `.env.template` file into a new file named `.env` and add your API keys into the .env file.  If you are participating in the private preview, some of these API keys will be provided for you in a separate document.  
 
+You can find the API key and endpoint of the Azure OpenAI resource that you created in step 5 in the [Azure portal](https://portal.azure.com/?feature.msaljs=true#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI), not [Azure AI Foundry](https://ai.azure.com) where you were deploying the models.  Click on the Azure OpenAI resource, and then in the left-hand sidebar under "Resource Management", select "Keys and Endpoint".   
+
+![Screenshot of Keys and Endpoint under Resource Management in the Azure portal](images/AOAIKeysAndEndpoint.jpg)
+
 For instructions on obtaining the required Azure service keys, see [this quickstart](https://learn.microsoft.com/en-us/azure/ai-services/openai/chatgpt-quickstart?tabs=api-key) or refer to the [Azure Search example](https://learn.microsoft.com/azure/search/search-security-api-keys) for step-by-step details.
 
 7. Run a quick connectivity check:
@@ -64,12 +68,7 @@ python azure_connectivity.py
 python app-file.py
 ```
 
-10. Navigate to the local site and start your chat:
-```
-http://localhost:8000/html/str_chat.html
-```
-
-You can also experiment at http://localhost:8000/html/nlwebsearch.html.  
+10. Navigate to the local site and start your chat:  http://localhost:8000/html/str_chat.html.  You can also experiment at http://localhost:8000/html/nlwebsearch.html.  
 
 
 ## Deploying to Azure
