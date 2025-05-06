@@ -13,8 +13,6 @@ pip install -r requirements.txt
 
 # Start the application
 echo "Starting application..."
-#source set_keys.sh     # Test that this is not needed
-#echo "set_keys.sh done"
 echo "Sleeping for 30 seconds"
 
 #python app-file.py
