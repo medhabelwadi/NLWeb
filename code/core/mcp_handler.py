@@ -174,7 +174,6 @@ async def handle_mcp_request(query_params, body, send_response, send_chunk, stre
                                         
                                 except Exception as e:
                                     logger.error(f"Error in MCPStreamHandler.write: {str(e)}")
-                                    print(f"Error in MCPStreamHandler.write: {str(e)}")
                                     self.closed = True
                         
                         async def write_stream(self, message, end_response=False):
