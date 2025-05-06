@@ -2,5 +2,5 @@
 # This file contains settings specific to the NLWeb functionality
 
 # Comma-separated list of allowed sites
-sites: "imdb,nytimes,alltrails,allbirds,seriouseats,oreilly,npr podcasts,backcountry,neurips,zillow,eventbrite,tripadvisor,woksoflife,cheftariq,hebbarskitchen,scifi_movies,latam_recipes,spruce"
+sites: "imdb,nytimes,delish,alltrails,allbirds,seriouseats,oreilly,npr podcasts,backcountry,neurips,zillow,eventbrite,tripadvisor,woksoflife,cheftariq,hebbarskitchen,scifi_movies,latam_recipes,spruce"
 #sites: "nytimes"

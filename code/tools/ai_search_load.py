@@ -274,4 +274,4 @@ def main():
 
 if __name__ == "__main__":
   #   main()
-    upload_data_from_csv("/Users/guha/mahi/data/sites/embeddings/small/eventbrite.txt", "eventbrite", "embeddings1536")
+    upload_data_from_csv("/Users/guha/mahi/data/sites/embeddings/small/delish.txt", "delish", "embeddings1536")

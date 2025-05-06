@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Change to the application directory
-cd /home/site/wwwroot
-
+cd /home/site/wwwroot/code
+#cd /Users/guha/NLWeb/code
 echo "Python version:"
 python --version
 echo "Directory contents:"
@@ -25,4 +25,4 @@ pip install pymilvus>=1.1.0
 # Start the application
 echo "Starting application..."
 #source set_keys.sh     # Test that this is not needed
-python WebServer.py
+python app-file.py

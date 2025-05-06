@@ -400,3 +400,4 @@ FodyWeavers.xsd
 *.sln.iml
 code/set_keys.sh
 data/sites/scifi_movies/embeddings/scifi_movies.txt
+code/webapp.zip

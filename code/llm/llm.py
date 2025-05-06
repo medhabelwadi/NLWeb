@@ -22,7 +22,7 @@ from llm.azure_llama import get_llama_completion
 from llm.azure_deepseek import get_deepseek_completion
 from llm.inceptionlabs import get_inceptionlabs_completion
 
-from utils.logging_config_helper import get_configured_logger
+from utils.logging_config_helper import get_configured_logger, LogLevel
 logger = get_configured_logger("llm_wrapper")
 
 # Add locks for thread-safe provider access
