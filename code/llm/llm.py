@@ -42,7 +42,7 @@ async def ask_llm(
 ) -> Dict[str, Any]:
     
     provider = provider or CONFIG.preferred_provider
-    logger.info(f"Initiating LLM request with provider: {provider}, level: {level}")
+    logger.debug(f"Initiating LLM request with provider: {provider}, level: {level}")
     logger.debug(f"Prompt preview: {prompt[:100]}...")
     logger.debug(f"Schema: {schema}")
     
@@ -53,7 +53,7 @@ async def ask_llm(
         raise ValueError(error_msg)
 
     model_id = getattr(CONFIG.providers[provider].models, level)
-    logger.info(f"Using model: {model_id}")
+    logger.debug(f"Using model: {model_id}")
 
     try:
         # Use timeout wrapper for all LLM calls

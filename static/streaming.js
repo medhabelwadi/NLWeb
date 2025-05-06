@@ -832,7 +832,7 @@ class ChatInterface {
    
       try {
         console.log("generate_mode", this.generate_mode);
-        const selectedSite = (this.site ||this.siteSelect.value);
+        const selectedSite = this.site || (this.siteSelect && this.siteSelect.value ? this.siteSelect.value : '');
         const prev = JSON.stringify(this.prevMessages);
         const generate_mode = this.generate_mode;
         const context_url = this.context_url && this.context_url.value ? this.context_url.value : '';
@@ -845,7 +845,9 @@ class ChatInterface {
         const queryParams = new URLSearchParams();
         queryParams.append('query_id', queryId);
         queryParams.append('query', message);
-        queryParams.append('site', selectedSite);
+        if (selectedSite) {
+          queryParams.append('site', selectedSite);
+        } 
         queryParams.append('generate_mode', generate_mode);
         queryParams.append('prev', prev);
         queryParams.append('item_to_remember', this.itemToRemember || '');

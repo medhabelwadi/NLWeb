@@ -14,6 +14,20 @@ class LogLevel(Enum):
     ERROR = logging.ERROR
     CRITICAL = logging.CRITICAL
 
+    @classmethod
+    def level_matches(cls, logger_level, message_level):
+        """
+        Check if a message at message_level should be logged given the logger's logger_level.
+        
+        Args:
+            logger_level: The configured level of the logger
+            message_level: The level of the message being logged
+            
+        Returns:
+            True if the message should be logged, False otherwise
+        """
+        return message_level.value >= logger_level.value
+
 
 class LoggerUtility:
     """A configurable logging utility with different verbosity levels."""
@@ -21,7 +35,7 @@ class LoggerUtility:
     def __init__(
         self,
         name: str = "AppLogger",
-        level: LogLevel = LogLevel.INFO,
+        level: LogLevel = LogLevel.ERROR,
         format_string: Optional[str] = None,
         log_file: Optional[str] = None,
         console_output: bool = True
@@ -38,6 +52,11 @@ class LoggerUtility:
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level.value)
+        
+        # Store the current level for reference
+        self._current_level = level
+
+      #  print(f"Logger level: {level} {name}")
         
         # Clear any existing handlers
         self.logger.handlers.clear()
@@ -62,34 +81,37 @@ class LoggerUtility:
     
     def set_level(self, level: LogLevel):
         """Set the logging verbosity level."""
+        self._current_level = level
         self.logger.setLevel(level.value)
     
     def get_level(self) -> LogLevel:
         """Get the current logging level."""
-        for log_level in LogLevel:
-            if log_level.value == self.logger.level:
-                return log_level
-        return LogLevel.INFO  # Default fallback
+        return self._current_level
     
     def debug(self, message: str, **kwargs):
         """Log a debug message."""
-        self.logger.debug(message, **kwargs)
+        if LogLevel.level_matches(self.get_level(), LogLevel.DEBUG):
+            self.logger.debug(message, **kwargs)
     
     def info(self, message: str, **kwargs):
         """Log an info message."""
-        self.logger.info(message, **kwargs)
+        if LogLevel.level_matches(self.get_level(), LogLevel.INFO):
+            self.logger.info(message, **kwargs)
     
     def warning(self, message: str, **kwargs):
         """Log a warning message."""
-        self.logger.warning(message, **kwargs)
+        if LogLevel.level_matches(self.get_level(), LogLevel.WARNING):
+            self.logger.warning(message, **kwargs)
     
     def error(self, message: str, **kwargs):
         """Log an error message."""
-        self.logger.error(message, **kwargs)
+        if LogLevel.level_matches(self.get_level(), LogLevel.ERROR):
+            self.logger.error(message, **kwargs)
     
     def critical(self, message: str, **kwargs):
         """Log a critical message."""
-        self.logger.critical(message, **kwargs)
+        if LogLevel.level_matches(self.get_level(), LogLevel.CRITICAL):
+            self.logger.critical(message, **kwargs)
     
     def exception(self, message: str, **kwargs):
         """Log an exception with traceback."""
@@ -104,9 +126,10 @@ class LoggerUtility:
             message: Log message
             context: Dictionary of context information
         """
-        context_str = " - ".join(f"{k}={v}" for k, v in context.items())
-        full_message = f"{message} | Context: {context_str}"
-        self.logger.log(level.value, full_message)
+        if LogLevel.level_matches(self.get_level(), level):
+            context_str = " - ".join(f"{k}={v}" for k, v in context.items())
+            full_message = f"{message} | Context: {context_str}"
+            self.logger.log(level.value, full_message)
 
 
 @lru_cache(maxsize=None)

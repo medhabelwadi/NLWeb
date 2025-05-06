@@ -12,7 +12,9 @@ import retrieval.retriever as retriever
 from utils.trim import trim_json
 import json
 from prompts.prompt_runner import PromptRunner
-import asyncio
+from utils.logger import get_logger
+
+logger = get_logger("Decontextualizer")
 
 class NoOpDecontextualizer(PromptRunner):
   
@@ -27,7 +29,7 @@ class NoOpDecontextualizer(PromptRunner):
         self.handler.decontextualized_query = self.handler.query
         self.handler.requires_decontextualization = False
         await self.handler.state.precheck_step_done(self.STEP_NAME)
-        print("Decontextualization not required")
+        logger.info("Decontextualization not required")
         return
     
 class PrevQueryDecontextualizer(NoOpDecontextualizer):
@@ -39,9 +41,9 @@ class PrevQueryDecontextualizer(NoOpDecontextualizer):
 
     async def do(self):
         response = await self.run_prompt(self.DECONTEXTUALIZE_QUERY_PROMPT_NAME, level="high")
-        print(f"response: {response}")
+        logger.info(f"response: {response}")
         if response is None:
-            print("No response from decontextualizer")
+            logger.info("No response from decontextualizer")
             self.handler.requires_decontextualization = False
             self.handler.decontextualized_query = self.handler.query
             await self.handler.state.precheck_step_done(self.STEP_NAME)
@@ -55,10 +57,10 @@ class PrevQueryDecontextualizer(NoOpDecontextualizer):
                 "type": "decontextualized_query",
                 "decontextualized_query": self.handler.decontextualized_query
             }
-            print(f"Sending decontextualized query: {self.handler.decontextualized_query}")
+            logger.info(f"Sending decontextualized query: {self.handler.decontextualized_query}")
             await self.handler.send_message(message)
         else:
-            print("No decontextualization required despite previous query")
+            logger.info("No decontextualization required despite previous query")
             self.handler.decontextualized_query = self.handler.query
             await self.handler.state.precheck_step_done(self.STEP_NAME)
         return

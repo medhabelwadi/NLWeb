@@ -208,13 +208,15 @@ def handle_site_parameter(query_params):
     """
     # Create a copy of query_params to avoid modifying the original
     result_params = query_params.copy()
-    
+    print(f"Query params: {query_params}")
     # Get allowed sites from config
     allowed_sites = CONFIG.get_allowed_sites()
-    
-    # Check if site parameter exists in query params
-    if "site" in query_params:
+    sites = []
+    if "site" in query_params and len(query_params["site"]) > 0:
         sites = query_params["site"]
+        print(f"Sites: {sites}")
+    # Check if site parameter exists in query params
+    if  len(sites) > 0:
         if isinstance(sites, list):
             # Validate each site
             valid_sites = []
@@ -319,10 +321,10 @@ async def fulfill_request(method, path, headers, query_params, body, send_respon
             generate_mode = get_param(query_params, "generate_mode", str, "none")
            
         if path == "/" or path == "":
-            # Serve the home page as /static/new_test.html
+            # Serve the home page as /static/index.html
             # First check if the file exists
             try:
-                await send_static_file("/static/new_test.html", send_response, send_chunk)
+                await send_static_file("/static/index.html", send_response, send_chunk)
             except FileNotFoundError:
                 # If new_test.html doesn't exist, send a 404 error
                 await send_response(404, {'Content-Type': 'text/plain'})

@@ -48,6 +48,16 @@ logging:
       env_var: "PROMPTS_LOG_LEVEL"
       default_level: ERROR
       log_file: "prompts.log"
+
+    decontextualizer:
+      env_var: "DECONTEXTUALIZER_LOG_LEVEL"
+      default_level: ERROR
+      log_file: "decontextualizer.log"
+
+    decontextualizer:
+      env_var: "REQUIRED_INFO_LOG_LEVEL"
+      default_level: ERROR
+      log_file: "required_info.log"
   
   # Global settings
   global:
