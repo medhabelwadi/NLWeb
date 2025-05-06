@@ -1,5 +1,5 @@
 port: 8000
-static_directory: ../../static
+static_directory: ../../
 
 # the system can be run in development or production mode.
 # if development, various config params can be overridden with query params
