@@ -93,6 +93,7 @@ For instructions on obtaining the required Azure service keys, see [this quickst
 
 
 ## Deploying NLWeb to an Azure WebApp
+Currently, while the repo is private, it is recommended to use option 2.  
 
 ### Option 1: Azure Portal Deployment
 
@@ -133,20 +134,20 @@ For instructions on obtaining the required Azure service keys, see [this quickst
 
 2. Create a resource group (if needed):
    ```bash
-   az group create --name yourResourceGroup --location eastus
+   az group create --name yourResourceGroup --location eastus2
    ```
 
 3. Create an App Service Plan:
    ```bash
-   az appservice plan create --name yourAppServicePlan --resource-group yourResourceGroup --sku B1 --is-linux
+   az appservice plan create --name yourAppServicePlan --resource-group yourResourceGroup --sku P1v3 --is-linux
    ```
 
 4. Create a Web App:
    ```bash
-   az webapp create --resource-group yourResourceGroup --plan yourAppServicePlan --name yourWebAppName --runtime "PYTHON|3.9"
+   az webapp create --resource-group yourResourceGroup --plan yourAppServicePlan --name yourWebAppName --runtime "PYTHON:3.13"
    ```
 
-5. Configure environment variables:
+5. Configure environment variables:  # TODO: can we skip this?
    ```bash
    az webapp config appsettings set --resource-group yourResourceGroup --name yourWebAppName --settings \
      AZURE_SEARCH_API_KEY="your_key_here" \
