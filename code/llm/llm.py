@@ -130,7 +130,7 @@ async def get_embedding(
         logger.error(error_msg)
         raise ValueError(error_msg)
 
-    model_id = getattr(CONFIG.providers[provider].models, quality)
+    model_id = CONFIG.providers[provider].embedding_model
     logger.debug(f"Using embedding model: {model_id}")
 
     try:
