@@ -23,20 +23,20 @@ These instructions assume that you have an [Azure subscription](https://go.micro
 
 ### Local Setup
 
-1. Clone or download this repository.
+1. Create a virtual environment, replacing 'myenv' if you want a different name for your environment. You can put this in a folder wherever your code is kept (your GitHub folder is an easy option).
+```
+python -m venv myenv
+
+```
+2. Activate the virtual environment - again, replace 'myenv' with the name you selected above, if different.   
+```
+source myenv/bin/activate    # Or on Windows: myenv\Scripts\activate
+```
+
+3. Navigate to your local GitHub folder.  Clone or download this repository.
 ```
 git clone https://github.com/microsoft/NLWeb
 cd NLWeb
-```
-
-2. Create a virtual environment, replacing 'myenv' with the name you want to give your environment.
-```
-python -m venv myenv
-```
-
-3. Activate the virtual environment - again, replace 'myenv' with the name you selected above.   
-```
-source myenv/bin/activate    # Or on Windows: myenv\Scripts\activate
 ```
 
 4. Install the dependencies.
@@ -45,30 +45,41 @@ cd code
 pip install -r requirements.txt
 ```
 
-5. Create an Azure OpenAI resource at https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI following the instructions at https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource.
+5. Setup your service API keys.  Copy the `.env.template` file into a new file named `.env` and add your API keys into the .env file.  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
+
+Note: By default, we assume you are using an Azure OAI endpoint and the 4.1, 4.1-mini, and text-embedding-3-small models.  If you are using a different setup, this needs to be changed in the code/config_llm.yaml file. Make sure to set the following:
+- Preferred Provider:  By default, this is 'azure_openai' - replace this with the model name from the list within the file.
+- Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini (as an example)
+
+6. Run a quick connectivity check:
+```
+python azure_connectivity.py
+```
+
+7. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.
+
+8. Run the application locally:
+```
+python app-file.py
+```
+
+10. Navigate to the local site and start your chat:  http://localhost:8000/static/str_chat.html.  You can also experiment at http://localhost:8000/static/nlwebsearch.html.  
+
+
+### Azure OpenAI Endpoint Creation (Note: TO UPDATE)
+
+If you don't have an Azure OpenAI endpoint, you can follow these instructions to deploy a new endpoint:
+
+1. Create an Azure OpenAI resource at https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI following the instructions at https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource.
 When you get to the "[Deploy a model](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model)" section, you will need to repeat this step **3 times** to deploy three base models: gpt-4.1, gpt-4.1-mini, and text-embedding-3-small.  
 
-6. Setup your service API keys.  Copy the `.env.template` file into a new file named `.env` and add your API keys into the .env file.  If you are participating in the private preview, some of these API keys will be provided for you in a separate document.  
-
-You can find the API key and endpoint of the Azure OpenAI resource that you created in step 5 in the [Azure portal](https://portal.azure.com/?feature.msaljs=true#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI), not [Azure AI Foundry](https://ai.azure.com) where you were deploying the models.  Click on the Azure OpenAI resource, and then in the left-hand sidebar under "Resource Management", select "Keys and Endpoint".   
+You can find the API key and endpoint of the Azure OpenAI resource that you created above in the [Azure portal](https://portal.azure.com/?feature.msaljs=true#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI), not [Azure AI Foundry](https://ai.azure.com) where you were deploying the models.  Click on the Azure OpenAI resource, and then in the left-hand sidebar under "Resource Management", select "Keys and Endpoint".   
 
 ![Screenshot of Keys and Endpoint under Resource Management in the Azure portal](images/AOAIKeysAndEndpoint.jpg)
 
 For instructions on obtaining the required Azure service keys, see [this quickstart](https://learn.microsoft.com/en-us/azure/ai-services/openai/chatgpt-quickstart?tabs=api-key) or refer to the [Azure Search example](https://learn.microsoft.com/azure/search/search-security-api-keys) for step-by-step details.
 
-7. Run a quick connectivity check:
-```
-python azure_connectivity.py
-```
 
-8. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.  
-
-9. Run the application locally:
-```
-python app-file.py
-```
-
-10. Navigate to the local site and start your chat:  http://localhost:8000/html/str_chat.html.  You can also experiment at http://localhost:8000/html/nlwebsearch.html.  
 
 
 ## Deploying to Azure
