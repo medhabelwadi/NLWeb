@@ -23,20 +23,20 @@ These instructions assume that you have an [Azure subscription](https://go.micro
 
 ## Local Setup
 
-1. Create a virtual environment, replacing 'myenv' if you want a different name for your environment. You can put this in a folder wherever your code is kept (your GitHub folder is an easy option).
+1. Clone or download this repository.
+```
+git clone https://github.com/microsoft/NLWeb
+cd NLWeb
+```
+
+2. Create a virtual environment, replacing 'myenv' if you want a different name for your environment. 
 ```
 python -m venv myenv
 ```
 
-2. Activate the virtual environment - again, replace 'myenv' with the name you selected above, if different.   
+3. Activate the virtual environment - again, replace 'myenv' with the name you selected above, if different.   
 ```
 source myenv/bin/activate    # Or on Windows: myenv\Scripts\activate
-```
-
-3. Navigate to your local GitHub folder.  Clone or download this repository.
-```
-git clone https://github.com/microsoft/NLWeb
-cd NLWeb
 ```
 
 4. Install the dependencies.
@@ -45,15 +45,15 @@ cd code
 pip install -r requirements.txt
 ```
 
-5. Setup your service API keys.  Copy the `.env.template` file into a new file named `.env` and add your API keys into the .env file.  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
+5. Create an LLM resource and setup your service API keys.  If you want to use the Azure OpenAI service, follow the instructions below at [Azure OpenAI endpoint creation instructions](#azure-openai-endpoint-creation).  Then, copy the `.env.template` file into a new file named `.env` and add your API keys for this resource into the .env file.  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
 
 > Note: By default, we assume you are using an Azure OAI endpoint and the 4.1, 4.1-mini, and text-embedding-3-small models.  If you are using a different setup, this needs to be changed in the [config_llm.yaml](code\config\config_llm.yaml) file. Make sure to set the following:
    > - Preferred Provider:  By default, this is `azure_openai` - replace this with the model name from the list within the file.
-   > - Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini (as an example)
+   > - Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini (as an example).
 
 6. Run a quick connectivity check:
 ```
-python azure_connectivity.py
+python azure-connectivity.py
 ```
 
 7. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.
@@ -76,7 +76,7 @@ If you don't have an LLM endpoint already, you can follow these instructions to 
 
 1. Create an Azure OpenAI resource at via the [portal](https://portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI).  Use these [instructions](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource) as a guide as needed.
 > Notes:
-> - Make sure you select a region where the models you want to use are available.  Refer to [AOAI Model Summary Table and Region Availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#model-summary-table-and-region-availability) for more info.  To use the Azure OAI defaults of 4.1 and 4.1-mini in the [config_llm.yaml](code\config\config_llm.yaml), we recommend using `eastus2` or `swedencentral`
+> - Make sure you select a region where the models you want to use are available.  Refer to [AOAI Model Summary Table and Region Availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#model-summary-table-and-region-availability) for more info.  To use the Azure OAI defaults of 4.1 and 4.1-mini in the [config_llm.yaml](code\config\config_llm.yaml), we recommend using `eastus2` or `swedencentral`.
 > - If you are calling this endpoint locally, make the endpoint accessible from the internet in the network setup step.
 
 2. Once your AOAI resource is created, you'll need to deploy your models within that resource.  This is done from Azure AI Foundry under [Deployments](https://ai.azure.com/resource/deployments). You can see instructions for this at [Azure AI Foundry - Deploy a Model](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model).
@@ -85,7 +85,7 @@ If you don't have an LLM endpoint already, you can follow these instructions to 
    > - You will need to repeat this step **3 times** to deploy three base models: `gpt-4.1`, `gpt-4.1-mini`, and `text-embedding-3-small`.
 
 
-3. You'll need to add your Azure OpenAI key to your [config_llm.yaml](code\config\config_llm.yaml) file (see step 5 in [Local Setup](#local-setup) above). You can find the endpoint API key for the Azure OpenAI resource that you created above in the [Azure portal](https://portal.azure.com/?feature.msaljs=true#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI), not [Azure AI Foundry](https://ai.azure.com) where you were deploying the models.  Click on the Azure OpenAI resource, and then in the left-hand sidebar under "Resource Management," select "Keys and Endpoint."   
+3. You'll need to add your Azure OpenAI endpoint and key to your .env file (see step 5 in [Local Setup](#local-setup) above). You can find the endpoint API key for the Azure OpenAI resource that you created above in the [Azure portal](https://portal.azure.com/?feature.msaljs=true#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/OpenAI), not [Azure AI Foundry](https://ai.azure.com) where you were deploying the models.  Click on the Azure OpenAI resource, and then in the left-hand sidebar under "Resource Management," select "Keys and Endpoint."   
 
 ![Screenshot of Keys and Endpoint under Resource Management in the Azure portal](images/AOAIKeysAndEndpoint.jpg)
 
@@ -147,16 +147,15 @@ Currently, while the repo is private, it is recommended to use option 2.
    az webapp create --resource-group yourResourceGroup --plan yourAppServicePlan --name yourWebAppName --runtime "PYTHON:3.13"
    ```
 
-5. Configure environment variables:  # TODO: can we skip this?
+5. Configure environment variables; modify the below command to include all of the environment variables in your .env:
    ```bash
    az webapp config appsettings set --resource-group yourResourceGroup --name yourWebAppName --settings \
-     AZURE_SEARCH_API_KEY="your_key_here" \
-     AZURE_EMBEDDING_API_KEY="your_key_here" \
-     AZURE_OPENAI_API_KEY="your_key_here" \
-     AZURE_DEEPSEEK_KEY="your_key_here" \
-     OPENAI_API_KEY="your_key_here" \
-     ANTHROPIC_API_KEY="your_key_here" \
-     WEBSITE_RUN_FROM_PACKAGE=1
+     AZURE_VECTOR_SEARCH_ENDPOINT="https://TODO.search.windows.net" \
+     AZURE_VECTOR_SEARCH_API_KEY="TODO" \
+     AZURE_OPENAI_ENDPOINT="https://TODO.openai.azure.com/" \
+     AZURE_OPENAI_API_KEY="TODO" \
+     WEBSITE_RUN_FROM_PACKAGE=1 \
+     SCM_DO_BUILD_DURING_DEPLOYMENT=true
    ```
 
 6. Set startup command:
