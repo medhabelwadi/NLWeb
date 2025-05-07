@@ -3,6 +3,7 @@ preferred_provider: azure_openai
 providers:
   openai:
     api_key_env: OPENAI_API_KEY
+    api_endpoint_env: OPENAI_ENDPOINT
     embedding_model_env: text-embedding-3-small
     models:
       high: gpt-4.1

@@ -19,8 +19,10 @@ from typing import Dict, Any, List
 from openai import AsyncOpenAI
 from config.config import CONFIG
 import threading
+from utils.logging_config_helper import get_configured_logger
+from utils.logger import LogLevel
 
-logger = logging.getLogger(__name__)
+logger = get_configured_logger("llm")
 
 
 class ConfigurationError(RuntimeError):
@@ -36,13 +38,11 @@ def get_openai_api_key() -> str:
     """
     # Get the API key from the preferred provider config
     preferred_provider = CONFIG.preferred_provider
+    logger.debug(f"Preferred provider: {preferred_provider}")
     provider_config = CONFIG.providers[preferred_provider]
-    api_key_env_var = provider_config.api_key_env
-    
-    key = os.getenv(api_key_env_var)
-    if not key:
-        raise ConfigurationError(f"{api_key_env_var} is not set")
-    return key
+    logger.debug(f"Provider config: {provider_config}")
+    api_key = provider_config.api_key
+    return api_key
 
 _client_lock = threading.Lock()
 openai_client = None
@@ -137,7 +137,7 @@ async def get_openai_embeddings(
     if model is None:
         preferred_provider = CONFIG.preferred_provider
         provider_config = CONFIG.providers[preferred_provider]
-        embedding_model_env_var = provider_config.embedding_model_env
+        embedding_model_env_var = provider_config.embedding_model
         
         if embedding_model_env_var:
             model = os.getenv(embedding_model_env_var)
