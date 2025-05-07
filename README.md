@@ -150,12 +150,12 @@ Currently, while the repo is private, it is recommended to use option 2.
 5. Configure environment variables; modify the below command to include all of the environment variables in your .env:
    ```bash
    az webapp config appsettings set --resource-group yourResourceGroup --name yourWebAppName --settings \
-     AZURE_VECTOR_SEARCH_ENDPOINT="https://TODO.search.windows.net" \
-     AZURE_VECTOR_SEARCH_API_KEY="TODO" \
-     AZURE_OPENAI_ENDPOINT="https://TODO.openai.azure.com/" \
-     AZURE_OPENAI_API_KEY="TODO" \
-     WEBSITE_RUN_FROM_PACKAGE=1 \
-     SCM_DO_BUILD_DURING_DEPLOYMENT=true
+    AZURE_VECTOR_SEARCH_ENDPOINT="https://TODO.search.windows.net" \
+    AZURE_VECTOR_SEARCH_API_KEY="TODO" \
+    AZURE_OPENAI_ENDPOINT="https://TODO.openai.azure.com/" \
+    AZURE_OPENAI_API_KEY="TODO" \
+    WEBSITE_RUN_FROM_PACKAGE=1 \
+    SCM_DO_BUILD_DURING_DEPLOYMENT=true
    ```
 
 6. Set startup command:
