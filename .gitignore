@@ -400,9 +400,10 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
-#NLWeb specfiic
+# NLWeb specific
 code/set_keys.sh
 data/sites/scifi_movies/embeddings/scifi_movies.txt
 code/webapp.zip
 .DS_Store
 code/.env
+app.zip

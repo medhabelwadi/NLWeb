@@ -13,7 +13,6 @@ pip install -r requirements.txt
 
 # Start the application
 echo "Starting application..."
-echo "Sleeping for 30 seconds"
 
 #python app-file.py
 python -m webserver/WebServer.py
