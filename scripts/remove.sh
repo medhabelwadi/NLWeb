@@ -18,12 +18,12 @@ function main(){
     load_deployment_state
 
     # Display resource information
-    echo -e "${GREEN}We found the following resources:${NC}"
-    echo -e "${BOLD}Resource Group:${NC} ${CYAN}$resource_group_name${NC}"
-    echo -e "${BOLD}Azure OpenAI Service:${NC} ${CYAN}$open_ai_resource_name${NC}"
+    echo -e "${RED}We found the following resources:${NC}"
+    echo -e "${BOLD}Resource Group:${NC} ${RED}$resource_group_name${NC}"
+    echo -e "${BOLD}Azure OpenAI Service:${NC} ${RED}$open_ai_resource_name${NC}"
     
     # Ask for confirmation
-    echo -e "\n${YELLOW}WARNING: This will permanently delete these resources and all their contents.${NC}"
+    echo -e "\n${RED}WARNING: This will permanently delete these resources and all their contents.${NC}"
     read -p "Are you sure you want to delete these resources? (yes/no): " confirm
     
     if [[ "$confirm" =~ ^[Yy][Ee][Ss]$ ]]; then
@@ -31,8 +31,8 @@ function main(){
         
         # Add resource deletion code here
         _debug "Deleting resource group: $resource_group_name"
-        # az group delete --name "$resource_group_name" --yes --no-wait
-        
+        az group delete --name "$resource_group_name" --yes --no-wait
+        rm ./.deployment
         echo -e "${GREEN}Resource deletion initiated. The process may take several minutes to complete.${NC}"
         echo -e "You can check the status in the Azure portal or by running:"
         echo -e "${CYAN}az group show --name \"$resource_group_name\"${NC}"
@@ -123,19 +123,6 @@ function load_deployment_state() {
     openai_model_sku_capacity=$(grep "^openai_model_sku_capacity=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
     openai_model_sku_name=$(grep "^openai_model_sku_name=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
     open_ai_endpoint=$(grep "^open_ai_endpoint=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    
-    # Print loaded values if in debug mode
-    if [ "$DEBUG" = true ]; then
-        _debug "Loaded deployment variables:"
-        _debug "  prefix/random_prefix: $random_prefix"
-        _debug "  resource_group_name: $resource_group_name"
-        _debug "  open_ai_resource_name: $open_ai_resource_name"
-        _debug "  subscription_id: $subscription_id"
-        _debug "  tenant_id: $tenant_id"
-        _debug "  location: $location"
-        _debug "  rg_location: $rg_location"
-        _debug "  open_ai_endpoint: $open_ai_endpoint"
-    fi
     
     return 0
 }
