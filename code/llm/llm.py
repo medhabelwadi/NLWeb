@@ -36,7 +36,7 @@ _providers = {
     "azure_openai": azure_openai_provider,
     "llama_azure": llama_provider,
     "deepseek_azure": deepseek_provider,
-    "inceptionlabs": inceptionlabs_provider,
+    "inception": inception_provider,
     "snowflake": snowflake_provider
 }
 
