@@ -17,7 +17,11 @@ tasks:
   deploy:openai:
     cmds:
       - ./setup.sh -d
-    dir: ./infra
+    dir: ./scripts
+  cleanup:
+    cmds:
+      - ./remove.sh -d
+    dir: ./scripts
   run:
     cmds:
        - task: deploy:openai
