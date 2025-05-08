@@ -48,3 +48,12 @@ providers:
     models:
       high: deepseek-coder-33b
       low: deepseek-coder-7b
+
+  snowflake:
+    api_key_env: SNOWFLAKE_PAT
+    api_endpoint_env: SNOWFLAKE_ACCOUNT_URL
+    embedding_model_env: SNOWFLAKE_EMBEDDING_MODEL
+    # From: https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#availability
+    models:
+      high: claude-3-5-sonnet
+      low: llama3.1-8b
