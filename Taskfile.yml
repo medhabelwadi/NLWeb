@@ -1,0 +1,30 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GREETING: Welcome to NL Web!
+
+tasks:
+  check:
+    cmds:
+      - python azure-connectivity.py 
+    dir: ./code
+  app:
+    cmds:
+      - python app-file.py
+    dir: ./code
+  deploy:openai:
+    cmds:
+      - ./setup.sh -d
+    dir: ./infra
+  run:
+    cmds:
+       - task: deploy:openai
+       - task: check
+       - task: app
+    dir: ./infra
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
