@@ -1,4 +1,4 @@
-preferred_provider: inception
+preferred_provider: azure_openai
 
 providers:
   inception:
