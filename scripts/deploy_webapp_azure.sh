@@ -13,19 +13,54 @@ function main(){
     load_deployment_state
     load_env_file
 
-
     # configure web variables
     app_service_name="nlweb-appsvc-$random_prefix"
     web_app_name="nlweb-web-$random_prefix"
-    resource_group_name="test_nlweb_hasho2_rg"
+    resource_group_name="test_nlweb_hasho3_rg"
+    acr_name="nlwebarc$random_prefix"
+    
     # ensure resource group exsits this operation is idempotent
     az group create --name "$resource_group_name" --location "westus"
+    az acr create --name "$acr_name" --resource-group "$resource_group_name"  --sku Standard
+    # az acr login -n "$acr_name"
+
+    # exit 0
 
     # deploy app service place
     az appservice plan create --name $app_service_name --resource-group $resource_group_name --sku P1v3 --is-linux
 
-    # deploy web app
-    az webapp create --resource-group $resource_group_name --plan $app_service_name --name $web_app_name --runtime "PYTHON:3.13"
+    # Create Web App with container configuration
+    _info "Creating Web App: $web_app_name with container from ACR"
+    az webapp create \
+        --resource-group "$resource_group_name" \
+        --plan "$app_service_name" \
+        --name "$web_app_name" \
+        --deployment-container-image-name "nlwebarceukxae.azurecr.io/nlweb:latest"
+    
+    # Assign system-assigned managed identity to web app
+    _info "Assigning managed identity to Web App"
+    az webapp identity assign --resource-group "$resource_group_name" --name "$web_app_name"
+    
+    # Get the principal ID of the web app's managed identity
+    principal_id=$(az webapp identity show --resource-group "$resource_group_name" --name "$web_app_name" --query principalId --output tsv)
+    
+    # Grant the web app's managed identity access to the ACR
+    _info "Granting ACR pull access to Web App"
+    acr_id=$(az acr show --name "$acr_name" --resource-group "$resource_group_name" --query id --output tsv)
+    az role assignment create --assignee "$principal_id" --scope "$acr_id" --role "AcrPull"
+    
+    # Configure continuous deployment from ACR
+    _info "Configuring continuous deployment from ACR"
+    az webapp config container set \
+        --resource-group "$resource_group_name" \
+        --name "$web_app_name" \
+        --docker-registry-server-url "https://nlwebarceukxae.azurecr.io" \
+        --docker-custom-image-name "nlwebarceukxae.azurecr.io/nlweb:latest" \
+        --docker-registry-server-user "$(az acr credential show --name "$acr_name" --query username --output tsv)" \
+        --docker-registry-server-password "$(az acr credential show --name "$acr_name" --query passwords[0].value --output tsv)"
+    
+    # # deploy web app
+    # az webapp create --resource-group $resource_group_name --plan $app_service_name --name $web_app_name --runtime "PYTHON:3.13"
 
     # configure app settings
     az webapp config appsettings set --resource-group $resource_group_name --name $web_app_name --settings \
@@ -36,11 +71,12 @@ function main(){
         WEBSITE_RUN_FROM_PACKAGE=1 \
         SCM_DO_BUILD_DURING_DEPLOYMENT=true
 
-    az webapp config set --resource-group $resource_group_name --name $web_app_name --startup-file "startup.sh"
+    # az webapp config set --resource-group $resource_group_name --name $web_app_name --startup-file "startup.sh"
 
-    git archive --format zip --output ./app.zip main
+#     git archive --format zip --output ./app.zip main
 
-    az webapp deployment source config-zip --resource-group $resource_group_name --name $web_app_name --src ./app.zip
+#    # az webapp deployment source config-zip --resource-group $resource_group_name --name $web_app_name --src ./app.zip
+#     az webapp deploy --src-path ./app.zip --type zip --name $web_app_name --resource-group $resource_group_name
 }
 
 # utility functions
