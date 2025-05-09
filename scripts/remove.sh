@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+REPO_DIR=$SCRIPT_DIR/../
+
+# includes
+source "$SCRIPT_DIR/lib/shell_logger.sh"
+source "$SCRIPT_DIR/lib/az.sh"
+source "$SCRIPT_DIR/lib/state.sh"
+
 
 declare resource_group_name
 declare DEBUG=false
@@ -40,91 +48,6 @@ function main(){
         echo -e "\n${GREEN}Deletion cancelled. Your resources are safe.${NC}"
         exit 0
     fi
-}
-
-# utilitites
-# color codes
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-BOLD='\033[1m'
-UNDERLINE='\033[4m'
-NC='\033[0m' # No Color
-
-
-function _debug(){
-    local message="$1"
-    
-    if [ "$DEBUG" = true ]; then
-        echo -e "${YELLOW}$message${NC}"
-    fi
-}
-function _info_mask(){
-    local label="$1"
-    local message="$2"
-    
-    if [ "$DEBUG" = true ]; then
-        message="$(echo "$message" | sed -E 's/^.*/****&/; s/^(.*)(.{4})$/****\2/')"
-        _info "$label $message"
-    fi
-    
-}
-
-function _info(){
-    local message="$1"
-    
-    if [ "$DEBUG" = true ]; then
-        echo -e "${MAGENTA}$message\n${NC}"
-    fi
-}
-function check_az_cli_logged_in(){
-    if ! az account show &> /dev/null
-    then
-        echo -e "${RED}You are not logged in to Azure CLI. Please log in using 'az login'.${NC}"
-        exit 1
-    fi
-}
-function check_az_cli_installed(){
-    if ! command -v az &> /dev/null
-    then
-        echo -e "${RED}Azure CLI is not installed and is a required dependency.\nhttps://learn.microsoft.com/cli/azure/install-azure-cli${NC}"
-        exit 1
-    fi
-}
-
-
-function load_deployment_state() {
-    local deployment_file="./.deployment"
-    
-    if [ ! -f "$deployment_file" ]; then
-        echo -e "${RED}Error: Deployment file not found: $deployment_file${NC}"
-        return 1
-    fi
-    
-    _debug "> Loading deployment state from $deployment_file"
-    
-    # Load all variables directly by sourcing the file
-    source "$deployment_file"
-    
-    # Explicitly set important variables to ensure they're properly loaded
-    prefix=$(grep "^prefix=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    random_prefix="$prefix"
-    resource_group_name=$(grep "^resource_group_name=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    open_ai_resource_name=$(grep "^open_ai_resource_name=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    subscription_id=$(grep "^subscription_id=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    tenant_id=$(grep "^tenant_id=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    location=$(grep "^location=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    rg_location=$(grep "^rg_location=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    open_ai_resource_sku=$(grep "^open_ai_resource_sku=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    openai_model_sku_capacity=$(grep "^openai_model_sku_capacity=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    openai_model_sku_name=$(grep "^openai_model_sku_name=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    open_ai_endpoint=$(grep "^open_ai_endpoint=" "$deployment_file" | cut -d= -f2 | tr -d '[:space:]')
-    
-    return 0
 }
 
 # parse arguments
