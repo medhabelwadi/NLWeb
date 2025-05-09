@@ -160,10 +160,10 @@ function configure_env_file(){
     local env_file="../code/.env"
     
     if [ ! -f "$env_file" ]; then
-        echo -e "${RED}Environment file not found: $env_file${NC}"
+        _error "Environment file not found: $env_file"
         return 1
     else 
-        echo "found env file!"
+        _info "loading existing env file"
     fi
     
     # Read Key Vault settings
@@ -220,8 +220,6 @@ function configure_env_file(){
     export SEARCH_ENDPOINT_SECRET_NAME="$search_endpoint_secret_name"
     export SEARCH_API_KEY_SECRET_NAME="$search_api_key_secret_name"
     
- 
-
     return 0
 }
 

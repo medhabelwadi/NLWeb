@@ -61,7 +61,8 @@ function fetch_secret_from_keyvault() {
     # Fetch the secret value
     local secret_value
     secret_value=$(az keyvault secret show --vault-name "$keyvault_name" --name "$secret_name" --query "value" -o tsv)
-    _debug "> Secret value: $secret_value"
+    _info_mask  "Secret value:" "$secret_value"
+    
     if [ -z "$secret_value" ]; then
         _error "Error: Failed to retrieve secret or secret is empty."
         return 1
