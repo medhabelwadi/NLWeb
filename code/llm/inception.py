@@ -26,7 +26,7 @@ class ConfigurationError(RuntimeError):
 
 
 
-class InceptionLabsProvider(LLMProvider):
+class InceptionProvider(LLMProvider):
     """Implementation of LLMProvider for InceptionLabs API.
 
         Perform a single-shot (non-streaming) chat completion asynchronously.
@@ -132,5 +132,5 @@ class InceptionLabsProvider(LLMProvider):
 
 
 # Create a singleton instance
-provider = InceptionLabsProvider()
+provider = InceptionProvider()
 

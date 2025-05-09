@@ -1,9 +1,8 @@
-preferred_provider: azure_openai
+preferred_provider: inception
 
 providers:
   inception:
     api_key_env: INCEPTION_API_KEY
-    embedding_api_key_env: OPENAI_API_KEY
     embedding_provider: openai
     embedding_model_env: OPENAI_EMBEDDING_MODEL
     models:
