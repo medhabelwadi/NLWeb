@@ -18,9 +18,17 @@ tasks:
     cmds:
       - ./setup.sh -d
     dir: ./scripts
+  deploy:web:
+    cmds:
+      - ./deploy_webapp_azure.sh -d
+    dir: ./scripts
   cleanup:
     cmds:
-      - ./remove.sh -d
+      - ./remove.sh
+    dir: ./scripts
+  foundry:
+    cmds:
+      - ./view.sh
     dir: ./scripts
   run:
     cmds:
