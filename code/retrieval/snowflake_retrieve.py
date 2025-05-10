@@ -85,6 +85,6 @@ def _process_result(r: Dict[str, str]) -> List[str]:
 
 def _name_from_schema_json(schema_json: str) -> str:
     try:
-        return json.loads(schema_json).get("name")
+        return json.loads(schema_json).get("name", "")
     except Exception as e:
         return ""
