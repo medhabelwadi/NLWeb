@@ -29,4 +29,4 @@ If configuration is set correctly, you'll see something like: `✅ All connectio
 ## Use LLMs from Snowflake
 
 1. Edit [config_llm.yaml](../code/config_llm.yaml) and change `preferred_provider` at the top to `preferred_provider: snowflake`
-2. (Optionally) adjust the models to use by setting `snowflake.models.high` or `snowflake.models.low` in `config_llm.yaml` to any of [the models available to your Snowflake account](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#availability), and/or
+2. (Optionally) adjust the models to use by setting `snowflake.models.high` or `snowflake.models.low` in `config_llm.yaml` to any of [the models available to your Snowflake account](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions#availability)
