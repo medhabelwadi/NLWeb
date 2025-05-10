@@ -9,31 +9,48 @@ try:
     import time
     import json
     from llm import snowflake
+    from retrieval import snowflake_retrieve
     import sys
 except ImportError as e:
     print(f"Error importing required libraries: {e}")
     print("Please run: pip install -r requirements.txt")
     sys.exit(1)
 
+async def check_and_print(f) -> bool:
+    try:
+        result = await f()
+        if result:
+            print(f"✅ {f.__name__}")
+        else:
+            print(f"❌ {f.__name__}")
+        return result
+    except Exception as e:
+        print(f"❌ {f.__name__}: {e}")
+        return False
 
-async def check_cortex_embed() -> bool:
+async def cortex_embed() -> bool:
     embedding = await snowflake.cortex_embed("Testing connectivity")
     return len(embedding) > 0
 
-async def check_cortex_complete() -> bool:
+async def cortex_complete() -> bool:
     resp = await snowflake.cortex_complete("The answer to the ultimate question of life, the universe, and everything is", {"answer": "string"})
     return resp.get("answer", None) is not None
+
+async def cortex_search() -> bool:
+    resp = await snowflake_retrieve.search("funny movies", top_n=1)
+    return len(resp) > 0 and len(resp[0]) == 4
 
 async def main():
     """Run all connectivity checks"""
 
     start_time = time.time()
     tasks = [
-        check_cortex_embed(),
-        check_cortex_complete(),
+        check_and_print(cortex_embed),
+        check_and_print(cortex_complete),
+        check_and_print(cortex_search),
     ]
     print("Running Snowflake connectivity checks...")
-    results = await asyncio.gather(*tasks, return_exceptions=False)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
     successful = sum(1 for r in results if r is True)
     total = len(tasks)
     
