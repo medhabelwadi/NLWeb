@@ -243,6 +243,8 @@ export class DropdownInterface {
       { id: 'azure_ai_search_2', name: 'Bing_Crawl' },
       { id: 'milvus_1', name: 'Milvus' },
       { id: 'snowflake_cortex_search_1', name: 'Snowflake_Cortex_Search' }
+      { id: 'qdrant', name: 'Qdrant' },
+
     ];
   }
 }

@@ -3,7 +3,7 @@
 
 """
 This file contains the base class for all handlers. 
-Currently only supports azure_ai_search and milvus.
+Currently supports azure_ai_search, milvus, and qdrant.
 
 WARNING: This code is under development and may undergo changes in future releases.
 Backwards compatibility is not guaranteed at this time.
@@ -13,6 +13,8 @@ Backwards compatibility is not guaranteed at this time.
 import retrieval.milvus_retrieve as milvus_retrieve
 import retrieval.azure_retrieve as azure_retrieve
 import retrieval.snowflake_retrieve as snowflake_retrieve
+import retrieval.qdrant_retrieve as qdrant_retrieve
+
 import time
 import asyncio
 from config.config import CONFIG
@@ -89,6 +91,9 @@ class DBQueryRetriever:
                 elif self.db_type == "snowflake_cortex_search":
                     logger.debug(f"Routing search to Snowflake Cortex Search retriever {query} {site} {num_results}")
                     results = await snowflake_retrieve.search_db(query, site, num_results)
+                elif self.db_type == "qdrant":
+                    logger.debug("Routing search to Qdrant retriever")
+                    results = await qdrant_retrieve.search_db(query, site, num_results, self.endpoint_name, self.query_params)
                 else:
                     error_msg = f"Invalid database type: {self.db_type}"
                     logger.error(error_msg)
@@ -165,6 +170,9 @@ class DBItemRetriever:
                 elif self.db_type == "snowflake_cortex_search":
                     logger.debug("Routing to Snowflake Cortex Search item retrieval")
                     result = await snowflake_retrieve.retrieve_item_with_url(url)
+                elif self.db_type == "qdrant":
+                    logger.debug("Routing to Qdrant item retrieval")
+                    result = await qdrant_retrieve.retrieve_item_with_url(url, self.endpoint_name)
                 else:
                     error_msg = f"Invalid database type: {self.db_type}"
                     logger.error(error_msg)
