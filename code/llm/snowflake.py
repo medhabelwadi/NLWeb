@@ -87,9 +87,6 @@ async def cortex_complete(
     - max_tokens: A value between 1 and 4096 (inclusive) that controls the maximum number of tokens to output. Output is truncated after this number of tokens.
     - top_p: A value from 0 to 1 (inclusive) that controls the diversity of the language model by restricting the set of possible tokens that the model outputs.
     - temperature: A value from 0 to 1 (inclusive) that controls the randomness of the output of the language model by influencing which possible token is chosen at each step.
-
-    TODO:
-    - Use COMPLETE structured outputs: https://docs.snowflake.com/en/user-guide/snowflake-cortex/complete-structured-outputs ?
     """
     if model is None:
         model = "claude-3-5-sonnet"
@@ -103,6 +100,8 @@ async def cortex_complete(
             "messages": [
                 # The precise system prompt may need adjustment given a model. For example, a simpler prompt worked well for larger
                 # models but saying JSON twice helped for llama3.1-8b
+                # Alternatively, should explore using structured outputs support as outlined in:
+                # https://docs.snowflake.com/en/user-guide/snowflake-cortex/complete-structured-outputs
                 {"role": "system", "content": f"Provide a response in valid JSON that matches this JSON schema: {json.dumps(schema)}"},
                 {"role": "user", "content": prompt},
             ],
