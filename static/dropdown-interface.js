@@ -241,7 +241,8 @@ export class DropdownInterface {
     return [
       { id: 'azure_ai_search_1', name: 'NLWeb_Crawl' },
       { id: 'azure_ai_search_2', name: 'Bing_Crawl' },
-      { id: 'milvus_1', name: 'Milvus' }
+      { id: 'milvus_1', name: 'Milvus' },
+      { id: 'qdrant', name: 'Qdrant' },
     ];
   }
 }
