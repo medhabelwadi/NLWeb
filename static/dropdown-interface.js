@@ -216,9 +216,9 @@ export class DropdownInterface {
    */
   getSites() {
     return [
-      'imdb', 'nytimes', 'delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
+      'scifi_movies', 'imdb', 'nytimes', 'delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
       'npr podcasts', 'backcountry', 'bc_product', 'neurips', 'zillow', 'eventbrite',
-      'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',  'scifi_movies',
+      'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',
       'latam_recipes', 'spruce', 'med podcast', 'allbirdsdd', 'all'
     ];
   }
@@ -242,7 +242,9 @@ export class DropdownInterface {
       { id: 'azure_ai_search_1', name: 'NLWeb_Crawl' },
       { id: 'azure_ai_search_2', name: 'Bing_Crawl' },
       { id: 'milvus_1', name: 'Milvus' },
+      { id: 'snowflake_cortex_search_1', name: 'Snowflake_Cortex_Search' }
       { id: 'qdrant', name: 'Qdrant' },
+
     ];
   }
 }

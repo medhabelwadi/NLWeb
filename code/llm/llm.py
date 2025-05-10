@@ -21,6 +21,7 @@ from llm.gemini import get_gemini_completion
 from llm.azure_llama import get_llama_completion
 from llm.azure_deepseek import get_deepseek_completion
 from llm.inceptionlabs import get_inceptionlabs_completion
+from llm.snowflake import cortex_complete as get_snowflake_cortex_completion
 
 from utils.logging_config_helper import get_configured_logger, LogLevel
 logger = get_configured_logger("llm_wrapper")
@@ -93,6 +94,15 @@ async def ask_llm(
             logger.debug(f"Azure OpenAI response received, size: {len(str(result))} chars")
             return result
 
+        if provider == "snowflake":
+            logger.debug("Calling Snowflake Cortex completion")
+            result = await asyncio.wait_for(
+                get_snowflake_cortex_completion(prompt, schema, model=model_id),
+                timeout=timeout
+            )
+            logger.debug(f"Snowflake Cortex response received, size: {len(str(result))} chars")
+            return result
+
         error_msg = f"No implementation for provider '{provider}'"
         logger.error(error_msg)
         raise ValueError(error_msg)
@@ -154,6 +164,13 @@ async def get_embedding(
             # here model_id is the deployment_id
             result = await azure_embed(text)
             logger.debug(f"Azure embeddings received, dimension: {len(result)}")
+            return result
+
+        if provider == "snowflake":
+            logger.debug("Getting embeddings from Snowflake Cortex")
+            from llm.snowflake import cortex_embed
+            result = await cortex_embed(text)
+            logger.debug(f"Snowflake Cortex embeddings retrieved, dimension: {len(result)}")
             return result
 
         error_msg = f"No implementation for provider '{provider}'"

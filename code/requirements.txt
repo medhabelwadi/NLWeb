@@ -12,3 +12,4 @@ pymilvus>=1.1.0
 qdrant-client>=1.14.0
 aiohttp>=3.9.1
 pyyaml>=6.0.1
+httpx>=0.28.1

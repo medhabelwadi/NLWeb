@@ -12,7 +12,9 @@ Backwards compatibility is not guaranteed at this time.
 
 import retrieval.milvus_retrieve as milvus_retrieve
 import retrieval.azure_retrieve as azure_retrieve
+import retrieval.snowflake_retrieve as snowflake_retrieve
 import retrieval.qdrant_retrieve as qdrant_retrieve
+
 import time
 import asyncio
 from config.config import CONFIG
@@ -86,6 +88,9 @@ class DBQueryRetriever:
                         results = await azure_retrieve.search_all_sites(query, num_results, self.endpoint_name, self.query_params)
                     else:
                         results = await azure_retrieve.search_db(query, site, num_results, self.endpoint_name, self.query_params)
+                elif self.db_type == "snowflake_cortex_search":
+                    logger.debug(f"Routing search to Snowflake Cortex Search retriever {query} {site} {num_results}")
+                    results = await snowflake_retrieve.search_db(query, site, num_results)
                 elif self.db_type == "qdrant":
                     logger.debug("Routing search to Qdrant retriever")
                     results = await qdrant_retrieve.search_db(query, site, num_results, self.endpoint_name, self.query_params)
@@ -162,6 +167,9 @@ class DBItemRetriever:
                 elif self.db_type == "azure_ai_search":
                     logger.debug("Routing to Azure AI Search item retrieval")
                     result = await azure_retrieve.retrieve_item_with_url(url, self.endpoint_name)
+                elif self.db_type == "snowflake_cortex_search":
+                    logger.debug("Routing to Snowflake Cortex Search item retrieval")
+                    result = await snowflake_retrieve.retrieve_item_with_url(url)
                 elif self.db_type == "qdrant":
                     logger.debug("Routing to Qdrant item retrieval")
                     result = await qdrant_retrieve.retrieve_item_with_url(url, self.endpoint_name)
