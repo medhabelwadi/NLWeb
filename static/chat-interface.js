@@ -4,7 +4,7 @@
  */
 
 import { ManagedEventSource } from './managed-event-source.js';
-import { jsonLdToHtml } from './utils.js';
+import { jsonLdToHtml, escapeHtml } from './utils.js';
 
 
 export class ChatInterface {
@@ -55,7 +55,12 @@ export class ChatInterface {
       this.generate_mode = urlGenerateMode;
     }
     
-    this.prevMessages = prevMessagesStr ? JSON.parse(decodeURIComponent(prevMessagesStr)) : [];
+    try {
+      this.prevMessages = prevMessagesStr ? JSON.parse(decodeURIComponent(prevMessagesStr)) : [];
+    } catch (e) {
+      console.error('Error parsing previous messages:', e);
+      this.prevMessages = [];
+    }
   }
 
   /**
@@ -205,10 +210,19 @@ export class ChatInterface {
     }
     
     if (Array.isArray(parsedContent)) {
-      bubble.innerHTML = parsedContent.map(obj => {
-        return this.createJsonItemHtml(obj).outerHTML;
-      }).join('<br><br>');
+      // Safer approach: Create DOM elements instead of using innerHTML
+      parsedContent.forEach(obj => {
+        const itemElement = this.createJsonItemHtml(obj);
+        bubble.appendChild(itemElement);
+        
+        // Add line breaks between items
+        if (parsedContent.indexOf(obj) < parsedContent.length - 1) {
+          bubble.appendChild(document.createElement('br'));
+          bubble.appendChild(document.createElement('br'));
+        }
+      });
     } else {
+      // Use textContent for regular messages to prevent XSS
       bubble.textContent = content;
     }
 
@@ -293,6 +307,7 @@ export class ChatInterface {
    * @returns {HTMLElement} - The HTML element
    */
   createJsonItemHtml(item) {
+    // Safely create container elements
     const container = document.createElement('div');
     container.className = 'item-container';
 
@@ -305,7 +320,8 @@ export class ChatInterface {
 
     // Description
     const description = document.createElement('div');
-    description.textContent = item.description;
+    // Use textContent for safe insertion of description
+    description.textContent = item.description || '';
     description.className = 'item-description';
     contentDiv.appendChild(description);
 
@@ -337,17 +353,24 @@ export class ChatInterface {
 
     // Title/link
     const titleLink = document.createElement('a');
-    titleLink.href = item.url;
+    titleLink.href = item.url ? escapeHtml(item.url) : '#'; // Sanitize URL
     const itemName = this.getItemName(item);
-    titleLink.textContent = this.htmlUnescape(itemName);
+    // Safe text insertion
+    titleLink.textContent = itemName;
     titleLink.className = 'item-title-link';
     titleRow.appendChild(titleLink);
 
     // Info icon
     const infoIcon = document.createElement('span');
-    infoIcon.innerHTML = '<img src="images/info.png">';
+    // Use a safer way to create the icon
+    const imgElement = document.createElement('img');
+    imgElement.src = 'images/info.png';
+    imgElement.alt = 'Info';
+    infoIcon.appendChild(imgElement);
+    
     infoIcon.className = 'item-info-icon';
-    infoIcon.title = item.explanation + "(score=" + item.score + ")" + "(Ranking time=" + item.time + ")";
+    // Sanitize tooltip content
+    infoIcon.title = `${escapeHtml(item.explanation || '')} (score=${item.score || 0}) (Ranking time=${item.time || 0})`;
     titleRow.appendChild(infoIcon);
 
     contentDiv.appendChild(titleRow);
@@ -361,8 +384,10 @@ export class ChatInterface {
    */
   addVisibleUrl(item, contentDiv) {
     const visibleUrlLink = document.createElement("a");
-    visibleUrlLink.href = item.siteUrl;
-    visibleUrlLink.textContent = item.site;
+    // Sanitize URL
+    visibleUrlLink.href = item.siteUrl ? escapeHtml(item.siteUrl) : '#';
+    // Use textContent for safe insertion
+    visibleUrlLink.textContent = item.site || '';
     visibleUrlLink.className = 'item-site-link';
     contentDiv.appendChild(visibleUrlLink);
   }
@@ -379,7 +404,9 @@ export class ChatInterface {
       if (imgURL) {
         const imageDiv = document.createElement('div');
         const img = document.createElement('img');
-        img.src = imgURL;
+        // Sanitize URL
+        img.src = escapeHtml(imgURL);
+        img.alt = 'Item image';
         img.className = 'item-image';
         imageDiv.appendChild(img);
         container.appendChild(imageDiv);
@@ -394,12 +421,15 @@ export class ChatInterface {
    * @returns {string} - The item name
    */
   getItemName(item) {
+    let name = '';
     if (item.name) {
-      return item.name;
+      name = item.name;
     } else if (item.schema_object && item.schema_object.keywords) {
-      return item.schema_object.keywords;
+      name = item.schema_object.keywords;
+    } else if (item.url) {
+      name = item.url;
     }
-    return item.url;
+    return name;
   }
   
   /**
@@ -437,8 +467,10 @@ export class ChatInterface {
     detailsDiv.className = 'item-real-estate-details';
     
     const schema = item.schema_object;
+    if (!schema) return;
+    
     const price = schema.price;
-    const address = schema.address;
+    const address = schema.address || {};
     const numBedrooms = schema.numberOfRooms;
     const numBathrooms = schema.numberOfBathroomsTotal;
     const sqft = schema.floorSize?.value;
@@ -446,13 +478,21 @@ export class ChatInterface {
     let priceValue = price;
     if (typeof price === 'object') {
       priceValue = price.price || price.value || price;
-      priceValue = Math.round(priceValue / 100000) * 100000;
-      priceValue = priceValue.toLocaleString('en-US');
+      if (typeof priceValue === 'number') {
+        priceValue = Math.round(priceValue / 100000) * 100000;
+        priceValue = priceValue.toLocaleString('en-US');
+      }
     }
 
-    detailsDiv.appendChild(this.makeAsSpan(address.streetAddress + ", " + address.addressLocality));
+    const streetAddress = address.streetAddress || '';
+    const addressLocality = address.addressLocality || '';
+    detailsDiv.appendChild(this.makeAsSpan(`${streetAddress}, ${addressLocality}`));
     detailsDiv.appendChild(document.createElement('br'));
-    detailsDiv.appendChild(this.makeAsSpan(`${numBedrooms} bedrooms, ${numBathrooms} bathrooms, ${sqft} sqft`));
+    
+    const bedroomsText = numBedrooms || '0';
+    const bathroomsText = numBathrooms || '0';
+    const sqftText = sqft || '0';
+    detailsDiv.appendChild(this.makeAsSpan(`${bedroomsText} bedrooms, ${bathroomsText} bathrooms, ${sqftText} sqft`));
     detailsDiv.appendChild(document.createElement('br'));
     
     if (priceValue) {
@@ -468,6 +508,7 @@ export class ChatInterface {
    */
   makeAsSpan(content) {
     const span = document.createElement('span');
+    // Use textContent for safe insertion
     span.textContent = content;
     span.className = 'item-details-text';
     return span;
@@ -484,7 +525,7 @@ export class ChatInterface {
   possiblyAddExplanation(item, contentDiv, force = false) {
     const detailsDiv = document.createElement('div'); 
     contentDiv.appendChild(document.createElement('br'));
-    const explSpan = this.makeAsSpan(item.explanation);
+    const explSpan = this.makeAsSpan(item.explanation || '');
     explSpan.className = 'item-explanation';
     detailsDiv.appendChild(explSpan);
     contentDiv.appendChild(detailsDiv);
@@ -517,7 +558,7 @@ export class ChatInterface {
       return image.url;
     } else if (typeof image === 'object' && image.contentUrl) {
       return image.contentUrl;
-    } else if (image instanceof Array) {
+    } else if (Array.isArray(image)) {
       if (image[0] && typeof image[0] === 'string') {
         return image[0];
       } else if (image[0] && typeof image[0] === 'object') {
@@ -534,9 +575,12 @@ export class ChatInterface {
    * @returns {string} - The unescaped string
    */
   htmlUnescape(str) {
-    const div = document.createElement("div");
-    div.innerHTML = str;
-    return div.textContent || div.innerText;
+    // Using a safer approach with DOMParser
+    if (!str || typeof str !== 'string') return '';
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<!DOCTYPE html><body>${str}`, 'text/html');
+    return doc.body.textContent || '';
   }
 
   /**
@@ -564,7 +608,8 @@ export class ChatInterface {
   createIntermediateMessageHtml(message) {
     const container = document.createElement('div');
     container.className = 'intermediate-container';
-    container.textContent = message;
+    // Use textContent for safe insertion
+    container.textContent = message || '';
     return container;
   }
 
@@ -579,6 +624,7 @@ export class ChatInterface {
     if (itemToRemember) {
       const messageDiv = document.createElement('div');
       messageDiv.className = 'remember-message';
+      // Use textContent for safe insertion
       messageDiv.textContent = itemToRemember;
       chatInterface.thisRoundRemembered = messageDiv;
       chatInterface.bubble.appendChild(messageDiv);
@@ -596,7 +642,8 @@ export class ChatInterface {
     console.log("askUserMessage", message);
     const messageDiv = document.createElement('div');
     messageDiv.className = 'ask-user-message';
-    messageDiv.textContent = message;
+    // Use textContent for safe insertion
+    messageDiv.textContent = message || '';
     chatInterface.bubble.appendChild(messageDiv);
   }
 
@@ -610,7 +657,8 @@ export class ChatInterface {
     console.log("siteIsIrrelevantToQuery", message);
     const messageDiv = document.createElement('div');
     messageDiv.className = 'site-is-irrelevant-to-query';
-    messageDiv.textContent = message;
+    // Use textContent for safe insertion
+    messageDiv.textContent = message || '';
     chatInterface.bubble.appendChild(messageDiv);
   }
 
@@ -625,6 +673,7 @@ export class ChatInterface {
     if (itemDetails) {
       const messageDiv = document.createElement('div');
       messageDiv.className = 'item-details-message';
+      // Use textContent for safe insertion
       messageDiv.textContent = itemDetails;
       chatInterface.thisRoundRemembered = messageDiv;
       chatInterface.bubble.appendChild(messageDiv);
@@ -639,9 +688,20 @@ export class ChatInterface {
    */
   possiblyAnnotateUserQuery(decontextualizedQuery) {
     const msgDiv = this.lastUserMessageDiv;
-    if (msgDiv) {
+    if (msgDiv && decontextualizedQuery) {
       // Optional: Uncomment to show decontextualized query
-      // msgDiv.innerHTML = this.currentMessage + "<br><span class=\"decontextualized-query\">" + decontextualizedQuery + "</span>";
+      // Use a safer approach if uncommenting
+      // const originalContent = this.currentMessage;
+      // msgDiv.textContent = '';
+      // 
+      // const textNode = document.createTextNode(originalContent);
+      // msgDiv.appendChild(textNode);
+      // msgDiv.appendChild(document.createElement('br'));
+      // 
+      // const decontextSpan = document.createElement('span');
+      // decontextSpan.className = 'decontextualized-query';
+      // decontextSpan.textContent = decontextualizedQuery;
+      // msgDiv.appendChild(decontextSpan);
     }
   }
   

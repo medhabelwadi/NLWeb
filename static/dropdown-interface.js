@@ -3,6 +3,8 @@
  * Handles the dropdown UI elements for site selection and options
  */
 
+import { escapeHtml } from './utils.js';
+
 export class DropdownInterface {
   /**
    * Creates a new DropdownInterface
@@ -60,8 +62,8 @@ export class DropdownInterface {
     
     this.getSites().forEach(site => {
       const option = document.createElement('option');
-      option.value = site;
-      option.textContent = site;
+      option.value = escapeHtml(site);
+      option.textContent = escapeHtml(site);
       siteSelect.appendChild(option);
     });
     
@@ -75,7 +77,7 @@ export class DropdownInterface {
     
     // Set initial value if chatInterface has a site
     if (this.chatInterface.site) {
-      siteSelect.value = this.chatInterface.site;
+      siteSelect.value = escapeHtml(this.chatInterface.site);
     }
     
     // Make siteSelect accessible to chatInterface
@@ -91,8 +93,8 @@ export class DropdownInterface {
     
     this.getGenerateModes().forEach(mode => {
       const option = document.createElement('option');
-      option.value = mode;
-      option.textContent = mode;
+      option.value = escapeHtml(mode);
+      option.textContent = escapeHtml(mode);
       generateModeSelect.appendChild(option);
     });
     
@@ -105,7 +107,7 @@ export class DropdownInterface {
     });
     
     // Set initial value
-    generateModeSelect.value = this.chatInterface.generate_mode;
+    generateModeSelect.value = escapeHtml(this.chatInterface.generate_mode);
     
     // Make generateModeSelect accessible to chatInterface
     this.chatInterface.generateModeSelect = generateModeSelect;
@@ -120,8 +122,8 @@ export class DropdownInterface {
     
     this.getDatabases().forEach(db => {
       const option = document.createElement('option');
-      option.value = db.id;
-      option.textContent = db.name;
+      option.value = escapeHtml(db.id);
+      option.textContent = escapeHtml(db.name);
       dbSelect.appendChild(option);
     });
     
@@ -146,7 +148,12 @@ export class DropdownInterface {
    */
   addClearChatIcon() {
     const clearIcon = document.createElement('span');
-    clearIcon.innerHTML = '<img src="images/clear.jpeg" class="selector-icon">';
+    const imgElement = document.createElement('img');
+    imgElement.src = 'images/clear.jpeg';
+    imgElement.className = 'selector-icon';
+    imgElement.alt = 'Clear';
+    clearIcon.appendChild(imgElement);
+    
     clearIcon.title = "Clear chat history";
     clearIcon.addEventListener('click', () => {
       this.chatInterface.resetChatState();
@@ -159,7 +166,12 @@ export class DropdownInterface {
    */
   addDebugIcon() {
     const debugIcon = document.createElement('span');
-    debugIcon.innerHTML = '<img src="images/debug.png" class="selector-icon">';
+    const imgElement = document.createElement('img');
+    imgElement.src = 'images/debug.png';
+    imgElement.className = 'selector-icon';
+    imgElement.alt = 'Debug';
+    debugIcon.appendChild(imgElement);
+    
     debugIcon.title = "Debug";
     debugIcon.addEventListener('click', () => {
       if (this.chatInterface.debug_mode) {
@@ -204,7 +216,7 @@ export class DropdownInterface {
    */
   makeSelectorLabel(label) {
     const labelDiv = document.createElement('span');
-    labelDiv.textContent = label;
+    labelDiv.textContent = escapeHtml(label);
     labelDiv.className = 'selector-label';
     return labelDiv;
   }
@@ -249,8 +261,6 @@ export class DropdownInterface {
       { id: 'qdrant_local', name: 'Qdrant Local' },
       { id: 'qdrant_url', name: 'Qdrant URL' },
       { id: 'snowflake_cortex_search_1', name: 'Snowflake_Cortex_Search' }
-
-
     ];
   }
 }

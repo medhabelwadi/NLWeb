@@ -3,24 +3,29 @@
  */
 
 /**
+ * Escapes HTML special characters in a string
+ * 
+ * @param {string} str - The string to escape
+ * @returns {string} - The escaped string
+ */
+export function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
  * Formats JSON-LD data as colored HTML for display
  * 
  * @param {Object|string} jsonLd - The JSON-LD data to format
  * @returns {string} - HTML representation of the JSON-LD
  */
 export function jsonLdToHtml(jsonLd) {
-  // Helper function to escape HTML special characters
-  const escapeHtml = (str) => {
-    if (typeof str !== 'string') return '';
-    
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  };
-
   // Helper function to format a single value
   const formatValue = (value, indent) => {
     const spaces = '  '.repeat(indent);
@@ -97,8 +102,22 @@ export function jsonLdToHtml(jsonLd) {
 .json-ld .unknown { color: #607d8b; }
 </style>`;
   } catch (error) {
-    return `<pre class="json-ld error">Error: ${error.message}</pre>`;
+    return `<pre class="json-ld error">Error: ${escapeHtml(error.message)}</pre>`;
   }
+}
+
+/**
+ * Safely unescapes HTML entities in a string
+ * 
+ * @param {string} str - The string to unescape
+ * @returns {string} - The unescaped string
+ */
+export function htmlUnescape(str) {
+  if (!str || typeof str !== 'string') return '';
+  
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<!DOCTYPE html><body>${str}`, 'text/html');
+  return doc.body.textContent || '';
 }
 
 /**
@@ -160,4 +179,26 @@ export function throttle(func, limit) {
       }, limit);
     }
   };
+}
+
+/**
+ * Sanitizes a URL to prevent javascript: protocol and other potentially dangerous URLs
+ * 
+ * @param {string} url - The URL to sanitize
+ * @returns {string} - The sanitized URL
+ */
+export function sanitizeUrl(url) {
+  if (!url || typeof url !== 'string') return '#';
+  
+  // Remove leading and trailing whitespace
+  const trimmedUrl = url.trim();
+  
+  // Check for javascript: protocol or other dangerous protocols
+  const protocolPattern = /^(javascript|data|vbscript|file):/i;
+  if (protocolPattern.test(trimmedUrl)) {
+    return '#';
+  }
+  
+  // For relative URLs or http/https, return as is
+  return trimmedUrl;
 }
