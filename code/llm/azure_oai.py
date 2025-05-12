@@ -27,6 +27,7 @@ class AzureOpenAIProvider(LLMProvider):
     _client_lock = threading.Lock()
     _client = None
 
+
     @classmethod
     def get_azure_endpoint(cls) -> str:
         """Get the Azure OpenAI endpoint from configuration."""

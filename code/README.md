@@ -11,8 +11,11 @@ code/
 ├── baseHandler.py          # Request handler
 ├── state.py                # State management
 ├── mllm.py                 # ML/LLM integration (modified for Azure)
-├── retriever.py            # Data retrieval
-├── azure_retrieve.py       # Azure AI Search integration
+├── retrieval/              # Static files directory
+|   ├── retriever.py        # Data retrieval
+|   ├── milvus_retrieve.py  # Milvus vector database integration
+|   ├── azure_retrieve.py   # Azure AI Search integration
+|   └── qdrant_retrieve.py  # Qdrant vector database integration
 ├── analyze_query.py        # Query analysis
 ├── decontextualize.py      # Query decontextualization
 ├── fastTrack.py            # Fast tracking
@@ -157,6 +160,48 @@ Azure App Service provides diagnostic tools in the Azure Portal:
 
 ### Health Check
 The application includes a health endpoint at `/health` that returns a JSON response indicating service health.
+
+## Vector Database Support
+
+NLWeb supports multiple vector database backends for semantic search. Configuration options are available at `config_retrieval.yaml`.
+
+### Azure AI Search
+
+```yaml
+azure_ai_search_1:
+  api_key_env: AZURE_VECTOR_SEARCH_API_KEY
+  api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
+  index_name: embeddings1536
+  db_type: azure_ai_search
+```
+
+### Milvus
+
+```yaml
+milvus_1:
+  database_path: ../milvus/milvus_prod.db
+  index_name: prod_collection
+  db_type: milvus
+```
+
+### Qdrant
+
+```yaml
+qdrant:
+  # To connect to a Qdrant server, set the `QDRANT_URL` and optionally `QDRANT_API_KEY`.
+  # > docker run -p 6333:6333 qdrant/qdrant
+  # QDRANT_URL="http://localhost:6333"
+  api_endpoint_env: QDRANT_URL
+  api_key_env: QDRANT_API_KEY
+
+  # To use a local persistent instance for prototyping,
+  # set database_path to a local directory
+  database_path: ""
+
+  # Set the name of the collection to use as `index_name`
+  index_name: nlweb_collection
+  db_type: qdrant
+```
 
 ## More Information
 

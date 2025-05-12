@@ -18,6 +18,9 @@ from typing import Dict, Any, List, Optional
 from openai import AsyncOpenAI
 from config.config import CONFIG
 import threading
+from utils.logging_config_helper import get_configured_logger
+from utils.logger import LogLevel
+
 
 from llm.llm_provider import LLMProvider
 
@@ -30,6 +33,7 @@ class ConfigurationError(RuntimeError):
     Raised when configuration is missing or invalid.
     """
     pass
+
 
 
 class OpenAIProvider(LLMProvider):
@@ -124,6 +128,7 @@ class OpenAIProvider(LLMProvider):
             raise
 
         return self.clean_response(response.choices[0].message.content)
+
 
 
 # Create a singleton instance

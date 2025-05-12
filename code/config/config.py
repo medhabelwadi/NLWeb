@@ -11,6 +11,7 @@ Backwards compatibility is not guaranteed at this time.
 import os
 import yaml
 from dataclasses import dataclass
+from dotenv import load_dotenv
 from typing import Dict, Optional, Any, List
 
 @dataclass
@@ -78,6 +79,7 @@ class AppConfig:
                    "config_webserver.yaml", "config_nlweb.yaml"]
 
     def __init__(self):
+        load_dotenv()
         self.load_llm_config()
         self.load_embedding_config()
         self.load_retrieval_config()
@@ -127,7 +129,6 @@ class AppConfig:
                 api_key = self._get_config_value(cfg.get("api_key_env"))
                 api_endpoint = self._get_config_value(cfg.get("api_endpoint_env"))
                 api_version = self._get_config_value(cfg.get("api_version_env"))
-
                 # Create the LLM provider config - no longer include embedding model
                 self.llm_providers[name] = LLMProviderConfig(
                     api_key=api_key,

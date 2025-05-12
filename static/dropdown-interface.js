@@ -216,9 +216,10 @@ export class DropdownInterface {
    */
   getSites() {
     return [
+
       'imdb', 'nytimes', 'verge','delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
       'npr podcasts', 'backcountry', 'bc_product', 'neurips', 'zillow', 'eventbrite',
-      'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',  'scifi_movies',
+      'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',
       'latam_recipes', 'spruce', 'med podcast', 'allbirdsdd', 'all'
     ];
   }
@@ -241,6 +242,7 @@ export class DropdownInterface {
     return [
       { id: 'azure_ai_search_1', name: 'NLWeb_Crawl' },
       { id: 'azure_ai_search_2', name: 'Bing_Crawl' },
+
       { id: 'azure_ai_search_test', name: 'NLWeb_Upload_Test' },
       { id: 'milvus_1', name: 'Milvus' },
       { id: 'qdrant_local', name: 'Qdrant Local' },

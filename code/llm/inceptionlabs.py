@@ -25,8 +25,13 @@ class ConfigurationError(RuntimeError):
     pass
 
 
+
 class InceptionLabsProvider(LLMProvider):
-    """Implementation of LLMProvider for InceptionLabs API."""
+    """Implementation of LLMProvider for InceptionLabs API.
+
+        Perform a single-shot (non-streaming) chat completion asynchronously.
+    Returns the full assistant response as a string, or as structured JSON if schema is provided.
+"""
     
     API_URL = "https://api.inceptionlabs.ai/v1/chat/completions"  # Mercury chat endpoint
 
@@ -72,6 +77,7 @@ class InceptionLabsProvider(LLMProvider):
         Perform a single-shot (non-streaming) chat completion asynchronously.
         Returns the full assistant response as a string, or as structured JSON if schema is provided.
         
+
         Args:
             prompt: The user prompt to send to the model
             schema: Optional JSON schema that the response should conform to

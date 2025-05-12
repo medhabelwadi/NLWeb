@@ -398,6 +398,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# NLWeb specific
 code/set_keys.sh
 data/sites/scifi_movies/embeddings/scifi_movies.txt
 code/webapp.zip
@@ -419,3 +421,6 @@ static/delish_chat.html
 code/cp
 /data/db
 data/json/ghrepoinfo-small.json
+code/.env
+app.zip
+

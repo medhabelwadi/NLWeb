@@ -14,6 +14,7 @@ from config.config import CONFIG
 import asyncio
 import threading
 
+
 # Import provider instances
 from llm.anthropic import provider as anthropic_provider
 from llm.azure_oai import provider as azure_openai_provider
@@ -85,6 +86,7 @@ async def ask_llm(
     logger.debug(f"Using model: {model_id}")
 
     try:
+
         # Get the provider instance
         if provider_name not in _providers:
             error_msg = f"No implementation for provider '{provider_name}'"
@@ -119,4 +121,5 @@ async def ask_llm(
                 "error_message": str(e)
             }
         )
+
         raise
