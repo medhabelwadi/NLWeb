@@ -45,15 +45,22 @@ cd code
 pip install -r requirements.txt
 ```
 
-5. Create an LLM resource and setup your service API keys.  If you want to use the Azure OpenAI service, follow the instructions below at [Azure OpenAI endpoint creation instructions](#azure-openai-endpoint-creation).  Then, copy the `.env.template` file into a new file named `.env` and add your API keys for this resource into the .env file.  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
+5. Create an LLM resource and setup your service API keys.  
+
+   If you want to use the Azure OpenAI service, follow the instructions below at [Azure OpenAI endpoint creation instructions](#azure-openai-endpoint-creation).  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
+
+   If you want to use Snowflake services, follow the instructions at [docs/Snowflake.md](docs\Snowflake.md).
+
+   Then, copy the `.env.template` file into a new file named `.env` and add your keys for this resource into the .env file.
 
 > Note: By default, we assume you are using an Azure OAI endpoint and the 4.1, 4.1-mini, and text-embedding-3-small models.  If you are using a different setup, this needs to be changed in the [config_llm.yaml](code\config\config_llm.yaml) file. Make sure to set the following:
-   > - Preferred Provider:  By default, this is `azure_openai` - replace this with the model name from the list within the file.
+   > - Preferred Provider:  By default, this is `azure_openai` - replace this with another provider listed within the file.
    > - Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini (as an example).
 
 6. Run a quick connectivity check:
 ```
-python azure-connectivity.py
+python azure-connectivity.py     # If you'd like to use Azure as the LLM/retrieval provider.
+python snowflake-connectivity.py # If you'd like to use Snowflake as the LLM/retrieval provider.
 ```
 
 7. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.

@@ -77,7 +77,7 @@ The user's question is: {request.query}. The item's description is {item.descrip
             prompt = fill_ranking_prompt(prompt_str, self.handler, description)
             
             logger.debug(f"Sending ranking request to LLM for item: {name}")
-            ranking = await ask_llm(prompt, ans_struc)
+            ranking = await ask_llm(prompt, ans_struc, level="low")
             logger.debug(f"Received ranking score: {ranking.get('score', 'N/A')} for item: {name}")
             
             ansr = {

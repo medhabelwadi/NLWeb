@@ -5,7 +5,7 @@ import chardet
 # for indexing or ranking. Further, many pages are just collections that we don't 
 # want to index at all. We can also skip things like Breadcrumbs
 
-skip_types = ["ListItem", "ItemList", "Organization", "BreadcrumbList", "Breadcrumb", "WebSite", "Article"
+skip_types = ["ListItem", "ItemList", "Organization", "BreadcrumbList", "Breadcrumb", "WebSite", "Article", 
               "SearchAction", "SiteNavigationElement", "WebPageElement", "WebPage", "NewsMediaOrganization",
               "MerchantReturnPolicy", "ReturnPolicy", "CollectionPage", "Brand", "Corporation", "NewsArticle",
               "SiteNavigationElement", "ReadAction", "ImageObject", "Person"]
@@ -13,7 +13,7 @@ skip_types = ["ListItem", "ItemList", "Organization", "BreadcrumbList", "Breadcr
 skip_properties = ["publisher", "mainEntityOfPage"]
 
 site_item_type = {
-    "allsites": ["Recipe", "Book", "NewsArticle", "Article", "LocalBusiness", "LodgingBusiness", "Restaurant", "Hotel", "Place", "Event", "Product", "Offer", "ProductGroup", "Question", "Answer", "ProfilePage"],
+    "allsites": ["Recipe", "Review", "Book", "NewsArticle", "Article", "LocalBusiness", "LodgingBusiness", "Restaurant", "Hotel", "Place", "Event", "Product", "Offer", "ProductGroup", "Question", "Answer", "ProfilePage"],
     "delish" : ["Person"],
    # "eatthis" : ["Person"],
     "instacart" : ["Product", "Offer", "ProductGroup", "Question", "Answer"],
@@ -40,7 +40,8 @@ def should_skip_item(site, item):
             if type_value in skip_types:
                 return True
     elif "@type" not in item:
-        print(f"@type not found in {item}")
+        return True
+        #print(f"@type not found in {item}")
     return False
 
 # go through each property in the schema_json and apply the following rules to construct
