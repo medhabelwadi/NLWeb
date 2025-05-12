@@ -2,7 +2,8 @@
 # Licensed under the MIT License
 
 """
-Basic config services, including loading config from config_llm.yaml, config_retrieval.yaml, config_webserver.yaml, config_nlweb.yaml
+Basic config services, including loading config from config_llm.yaml, config_embedding.yaml, config_retrieval.yaml, 
+config_webserver.yaml, config_nlweb.yaml
 WARNING: This code is under development and may undergo changes in future releases.
 Backwards compatibility is not guaranteed at this time.
 """
@@ -18,13 +19,18 @@ class ModelConfig:
     low: str
 
 @dataclass
-class ProviderConfig:
+class LLMProviderConfig:
     api_key: Optional[str] = None
     models: Optional[ModelConfig] = None
     endpoint: Optional[str] = None
     api_version: Optional[str] = None
-    embedding_model: Optional[str] = None
-    azure_embedding_api_version: Optional[str] = None
+
+@dataclass
+class EmbeddingProviderConfig:
+    api_key: Optional[str] = None
+    endpoint: Optional[str] = None
+    api_version: Optional[str] = None
+    model: Optional[str] = None
 
 @dataclass
 class RetrievalProviderConfig:
@@ -64,12 +70,16 @@ class ServerConfig:
 @dataclass
 class NLWebConfig:
     sites: List[str]  # List of allowed sites
+    json_data_folder: str = "./data/json"  # Default folder for JSON data
+    json_with_embeddings_folder: str = "./data/json_with_embeddings"  # Default folder for JSON with embeddings
 
 class AppConfig:
-    config_paths = ["config.yaml", "config_llm.yaml", "config_retrieval.yaml", "config_webserver.yaml", "config_nlweb.yaml"]
+    config_paths = ["config.yaml", "config_llm.yaml", "config_embedding.yaml", "config_retrieval.yaml", 
+                   "config_webserver.yaml", "config_nlweb.yaml"]
 
     def __init__(self):
         self.load_llm_config()
+        self.load_embedding_config()
         self.load_retrieval_config()
         self.load_webserver_config()
         self.load_nlweb_config()
@@ -103,8 +113,8 @@ class AppConfig:
         with open(full_path, "r") as f:
             data = yaml.safe_load(f)
 
-            self.preferred_provider: str = data["preferred_provider"]
-            self.providers: Dict[str, ProviderConfig] = {}
+            self.preferred_llm_provider: str = data["preferred_provider"]
+            self.llm_providers: Dict[str, LLMProviderConfig] = {}
 
             for name, cfg in data.get("providers", {}).items():
                 m = cfg.get("models", {})
@@ -117,18 +127,50 @@ class AppConfig:
                 api_key = self._get_config_value(cfg.get("api_key_env"))
                 api_endpoint = self._get_config_value(cfg.get("api_endpoint_env"))
                 api_version = self._get_config_value(cfg.get("api_version_env"))
-                embedding_model = self._get_config_value(cfg.get("embedding_model_env"))
-                azure_embedding_api_version = self._get_config_value(cfg.get("azure-embedding-api-version"))
 
-                # Create the provider config
-                self.providers[name] = ProviderConfig(
+                # Create the LLM provider config - no longer include embedding model
+                self.llm_providers[name] = LLMProviderConfig(
                     api_key=api_key,
                     models=models,
                     endpoint=api_endpoint,
-                    api_version=api_version,
-                    embedding_model=embedding_model,
-                    azure_embedding_api_version=azure_embedding_api_version
+                    api_version=api_version
                 )
+
+    def load_embedding_config(self, path: str = "config_embedding.yaml"):
+        """Load embedding model configuration."""
+        # Get the directory where this config.py file is located
+        config_dir = os.path.dirname(os.path.abspath(__file__))
+        # Build the full path to the config file
+        full_path = os.path.join(config_dir, path)
+        
+        try:
+            with open(full_path, "r") as f:
+                data = yaml.safe_load(f)
+        except FileNotFoundError:
+            # If config file doesn't exist, use defaults
+            print(f"Warning: {path} not found. Using default embedding configuration.")
+            data = {
+                "preferred_provider": "openai",
+                "providers": {}
+            }
+        
+        self.preferred_embedding_provider: str = data["preferred_provider"]
+        self.embedding_providers: Dict[str, EmbeddingProviderConfig] = {}
+
+        for name, cfg in data.get("providers", {}).items():
+            # Extract configuration values from the YAML
+            api_key = self._get_config_value(cfg.get("api_key_env"))
+            api_endpoint = self._get_config_value(cfg.get("api_endpoint_env"))
+            api_version = self._get_config_value(cfg.get("api_version_env"))
+            model = self._get_config_value(cfg.get("model"))
+
+            # Create the embedding provider config
+            self.embedding_providers[name] = EmbeddingProviderConfig(
+                api_key=api_key,
+                endpoint=api_endpoint,
+                api_version=api_version,
+                model=model
+            )
 
     def load_retrieval_config(self, path: str = "config_retrieval.yaml"):
         # Get the directory where this config.py file is located
@@ -136,23 +178,31 @@ class AppConfig:
         # Build the full path to the config file
         full_path = os.path.join(config_dir, path)
         
-        with open(full_path, "r") as f:
-            data = yaml.safe_load(f)
+        try:
+            with open(full_path, "r") as f:
+                data = yaml.safe_load(f)
+        except FileNotFoundError:
+            # If config file doesn't exist, use defaults
+            print(f"Warning: {path} not found. Using default retrieval configuration.")
+            data = {
+                "preferred_endpoint": "default",
+                "endpoints": {}
+            }
 
         # Changed from preferred_provider to preferred_endpoint
-            self.preferred_retrieval_endpoint: str = data["preferred_endpoint"]
-            self.retrieval_endpoints: Dict[str, RetrievalProviderConfig] = {}
+        self.preferred_retrieval_endpoint: str = data["preferred_endpoint"]
+        self.retrieval_endpoints: Dict[str, RetrievalProviderConfig] = {}
 
-            # Changed from providers to endpoints
-            for name, cfg in data.get("endpoints", {}).items():
-                # Use the new method for all configuration values
-                self.retrieval_endpoints[name] = RetrievalProviderConfig(
-                    api_key=self._get_config_value(cfg.get("api_key_env")),
-                    api_endpoint=self._get_config_value(cfg.get("api_endpoint_env")),
-                    database_path=self._get_config_value(cfg.get("database_path")),
-                    index_name=self._get_config_value(cfg.get("index_name")),
-                    db_type=self._get_config_value(cfg.get("db_type"))  # Add db_type
-                )
+        # Changed from providers to endpoints
+        for name, cfg in data.get("endpoints", {}).items():
+            # Use the new method for all configuration values
+            self.retrieval_endpoints[name] = RetrievalProviderConfig(
+                api_key=self._get_config_value(cfg.get("api_key_env")),
+                api_endpoint=self._get_config_value(cfg.get("api_endpoint_env")),
+                database_path=self._get_config_value(cfg.get("database_path")),
+                index_name=self._get_config_value(cfg.get("index_name")),
+                db_type=self._get_config_value(cfg.get("db_type"))  # Add db_type
+            )
     
     def load_webserver_config(self, path: str = "config_webserver.yaml"):
         # Get the directory where this config.py file is located
@@ -236,14 +286,46 @@ class AppConfig:
             # If config file doesn't exist, use defaults
             print(f"Warning: {path} not found. Using default NLWeb configuration.")
             data = {
-                "sites": ""
+                "sites": "",
+                "data_folders": {
+                    "json_data": "./data/json",
+                    "json_with_embeddings": "./data/json_with_embeddings"
+                }
             }
         
         # Parse the comma-separated sites string into a list
         sites_str = self._get_config_value(data.get("sites"), "")
         sites_list = [site.strip() for site in sites_str.split(",") if site.strip()]
         
-        self.nlweb = NLWebConfig(sites=sites_list)
+        # Get data folder paths from config
+        json_data_folder = "./data/json"
+        json_with_embeddings_folder = "./data/json_with_embeddings"
+        
+        if "data_folders" in data:
+            json_data_folder = self._get_config_value(
+                data["data_folders"].get("json_data"), 
+                json_data_folder
+            )
+            json_with_embeddings_folder = self._get_config_value(
+                data["data_folders"].get("json_with_embeddings"), 
+                json_with_embeddings_folder
+            )
+        
+        # Convert relative paths to absolute paths based on config file location
+        if not os.path.isabs(json_data_folder):
+            json_data_folder = os.path.abspath(os.path.join(config_dir, json_data_folder))
+        if not os.path.isabs(json_with_embeddings_folder):
+            json_with_embeddings_folder = os.path.abspath(os.path.join(config_dir, json_with_embeddings_folder))
+        
+        # Ensure directories exist
+        os.makedirs(json_data_folder, exist_ok=True)
+        os.makedirs(json_with_embeddings_folder, exist_ok=True)
+        
+        self.nlweb = NLWebConfig(
+            sites=sites_list,
+            json_data_folder=json_data_folder,
+            json_with_embeddings_folder=json_with_embeddings_folder
+        )
     
     def get_ssl_cert_path(self) -> Optional[str]:
         """Get the SSL certificate file path."""
@@ -283,6 +365,32 @@ class AppConfig:
         if not allowed_sites:
             return True
         return site in allowed_sites
+    
+    def get_embedding_provider(self, provider_name: Optional[str] = None) -> Optional[EmbeddingProviderConfig]:
+        """Get the specified embedding provider config or the preferred one if not specified."""
+        if not hasattr(self, 'embedding_providers'):
+            return None
+            
+        if provider_name and provider_name in self.embedding_providers:
+            return self.embedding_providers[provider_name]
+            
+        if hasattr(self, 'preferred_embedding_provider') and self.preferred_embedding_provider in self.embedding_providers:
+            return self.embedding_providers[self.preferred_embedding_provider]
+            
+        return None
+            
+    def get_llm_provider(self, provider_name: Optional[str] = None) -> Optional[LLMProviderConfig]:
+        """Get the specified LLM provider config or the preferred one if not specified."""
+        if not hasattr(self, 'llm_providers'):
+            return None
+            
+        if provider_name and provider_name in self.llm_providers:
+            return self.llm_providers[provider_name]
+            
+        if hasattr(self, 'preferred_llm_provider') and self.preferred_llm_provider in self.llm_providers:
+            return self.llm_providers[self.preferred_llm_provider]
+            
+        return None
 
 # Global singleton
 CONFIG = AppConfig()

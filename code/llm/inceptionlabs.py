@@ -1,91 +1,130 @@
+# Copyright (c) 2025 Microsoft Corporation.
+# Licensed under the MIT License
+
+"""
+InceptionLabs API wrapper for LLM functionality.
+
+WARNING: This code is under development and may undergo changes in future releases.
+Backwards compatibility is not guaranteed at this time.
+"""
+
 import os
 import requests
 import json
-from typing import Generator, Optional, Dict, Any
-import aiohttp
 import re
+import aiohttp
 import asyncio
 import threading
+from typing import Dict, Any, Optional
 
-# ─── Configuration ─────────────────────────────────────────────────────────────
+from llm.llm_provider import LLMProvider
 
-API_URL = "https://api.inceptionlabs.ai/v1/chat/completions"  # Mercury chat endpoint :contentReference[oaicite:1]{index=1}
 
-def get_api_key() -> str:
-    key = os.getenv("INCEPTION_API_KEY")
-    if not key:
-        raise RuntimeError("INCEPTION_API_KEY environment variable is not set")
-    return key
+class ConfigurationError(RuntimeError):
+    """Raised when configuration is missing or invalid."""
+    pass
 
-HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {get_api_key()}",
-}
 
-# ─── Chat Completion (Async) ─────────────────────────────────────────────────────
-
-async def get_inceptionlabs_completion(
-    prompt: str,
-    json_schema: Optional[Dict[str, Any]] = None,
-    model: str = "mercury-coder-small",
-    temperature: float = 0.7,
-    max_tokens: int = 512,
-    diffusing: bool = False,
-) -> Any:
-    """
-    Perform a single-shot (non-streaming) chat completion asynchronously.
-    Returns the full assistant response as a string, or as structured JSON if schema is provided.
+class InceptionLabsProvider(LLMProvider):
+    """Implementation of LLMProvider for InceptionLabs API."""
     
-    Args:
-        prompt: The user prompt to send to the model
-        json_schema: Optional JSON schema that the response should conform to
-        model: The model to use for completion
-        temperature: Controls randomness (0-1)
-        max_tokens: Maximum number of tokens to generate
-        diffusing: Whether to use diffusion mode
+    API_URL = "https://api.inceptionlabs.ai/v1/chat/completions"  # Mercury chat endpoint
+
+    @classmethod
+    def get_api_key(cls) -> str:
+        """Get API key from environment variables."""
+        key = os.getenv("INCEPTION_API_KEY")
+        if not key:
+            raise ConfigurationError("INCEPTION_API_KEY environment variable is not set")
+        return key
+
+    @classmethod
+    def get_client(cls):
+        """
+        InceptionLabs uses direct HTTP calls, so there's no persistent client.
+        This method is implemented to satisfy the interface but returns None.
+        """
+        return None
+
+    @classmethod
+    def clean_response(cls, content: str) -> Dict[str, Any]:
+        """
+        Strip markdown fences and extract the first JSON object.
+        """
+        cleaned = re.sub(r"```(?:json)?\s*", "", content).strip()
+        match = re.search(r"(\{.*\})", cleaned, re.S)
+        if not match:
+            raise ValueError("No JSON object found in response")
+        return json.loads(match.group(1))
+
+    async def get_completion(
+        self,
+        prompt: str,
+        schema: Optional[Dict[str, Any]] = None,
+        model: str = "mercury-coder-small",
+        temperature: float = 0.7,
+        max_tokens: int = 512,
+        timeout: float = 30.0,
+        diffusing: bool = False,
+        **kwargs
+    ) -> Any:
+        """
+        Perform a single-shot (non-streaming) chat completion asynchronously.
+        Returns the full assistant response as a string, or as structured JSON if schema is provided.
         
-    Returns:
-        String response or parsed JSON object if json_schema is provided
-    """
-    
-    messages = []
-    
-    if json_schema:
-        # Add system message to enforce JSON schema
-        system_prompt = f"Provide a response that matches this JSON schema: {json.dumps(json_schema)}"
-        messages.append({"role": "system", "content": system_prompt})
-    
-    # Add user message
-    messages.append({"role": "user", "content": prompt})
-    
-    payload = {
-        "model": model,
-        "messages": messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
-    }
-    if diffusing:
-        payload["diffusing"] = True
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(API_URL, headers=HEADERS, json=payload, timeout=30) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
-            content = data["choices"][0]["message"]["content"]
+        Args:
+            prompt: The user prompt to send to the model
+            schema: Optional JSON schema that the response should conform to
+            model: The model to use for completion
+            temperature: Controls randomness (0-1)
+            max_tokens: Maximum number of tokens to generate
+            timeout: Request timeout in seconds
+            diffusing: Whether to use diffusion mode
+            **kwargs: Additional provider-specific arguments
             
-            # If schema was provided, parse the response as JSON
-            if json_schema:
-                return clean_json_response(content)
-            return content
+        Returns:
+            String response or parsed JSON object if schema is provided
+        """
+        HEADERS = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.get_api_key()}",
+        }   
+        messages = []
+        
+        if schema:
+            # Add system message to enforce JSON schema
+            system_prompt = f"Provide a response that matches this JSON schema: {json.dumps(schema)}"
+            messages.append({"role": "system", "content": system_prompt})
+        
+        # Add user message
+        messages.append({"role": "user", "content": prompt})
+        
+        payload = {
+            "model": model,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        if diffusing:
+            payload["diffusing"] = True
 
-def clean_json_response(content: str) -> Dict[str, Any]:
-    """
-    Strip markdown fences and extract the first JSON object.
-    """
-    cleaned = re.sub(r"```(?:json)?\s*", "", content).strip()
-    match = re.search(r"(\{.*\})", cleaned, re.S)
-    if not match:
-        raise ValueError("No JSON object found in response")
-    return json.loads(match.group(1))
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                self.API_URL, 
+                headers=HEADERS, 
+                json=payload, 
+                timeout=timeout
+            ) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                content = data["choices"][0]["message"]["content"]
+                
+                # If schema was provided, parse the response as JSON
+                if schema:
+                    return self.clean_response(content)
+                return content
 
+
+# Create a singleton instance
+provider = InceptionLabsProvider()
 
