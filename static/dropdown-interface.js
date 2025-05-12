@@ -245,8 +245,13 @@ export class DropdownInterface {
 
       { id: 'azure_ai_search_test', name: 'NLWeb_Upload_Test' },
       { id: 'milvus_1', name: 'Milvus' },
+<<<<<<< Updated upstream
       { id: 'qdrant_local', name: 'Qdrant Local' },
       { id: 'qdrant_url', name: 'Qdrant URL' },
+=======
+      { id: 'snowflake_cortex_search_1', name: 'Snowflake_Cortex_Search' },
+      { id: 'qdrant', name: 'Qdrant' },
+>>>>>>> Stashed changes
 
     ];
   }
