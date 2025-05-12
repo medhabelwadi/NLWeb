@@ -137,6 +137,7 @@ class AzureOpenAIProvider(LLMProvider):
             logger.error(f"{error_msg}, content: {response_text}")
             raise ValueError(error_msg)
             
+
         json_str = response_text[start_idx:end_idx]
                 
         try:
