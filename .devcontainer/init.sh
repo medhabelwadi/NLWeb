@@ -9,3 +9,6 @@ pushd ./code || exit
   pip install --upgrade pip
   pip install -r requirements.txt
 popd || exit
+
+# install tflint
+curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
