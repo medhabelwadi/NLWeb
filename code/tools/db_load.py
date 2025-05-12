@@ -517,20 +517,49 @@ async def loadJsonWithEmbeddingsToDB(file_path: str, site: str, batch_size: int 
         file_path = temp_path
     
     try:
-        # IMPORTANT FIX: Check if the path already contains the embeddings folder path
-        embeddings_folder = CONFIG.nlweb.json_with_embeddings_folder
+        resolved_path = None
         
-        # If the path already starts with the embeddings folder, use it directly
-        if file_path.startswith(embeddings_folder):
-            resolved_path = file_path
-        else:
-            # Otherwise, it might be just a filename or relative path, so resolve it
-            resolved_path = get_embeddings_file_path(file_path)
+        # First, check if the file exists at the given path
+        if os.path.exists(file_path):
+            # Check if this file actually contains embeddings
+            file_type, has_embeddings = await detect_file_type(file_path)
+            if has_embeddings:
+                # If the file exists and has embeddings, use it directly
+                print(f"File exists and contains embeddings, using directly: {file_path}")
+                resolved_path = file_path
+            else:
+                print(f"File exists but doesn't contain embeddings: {file_path}")
+        
+        # If we haven't resolved a path yet, try standard resolution methods
+        if resolved_path is None:
+            embeddings_folder = CONFIG.nlweb.json_with_embeddings_folder
             
+            # If the path already starts with the embeddings folder, use it directly
+            if file_path.startswith(embeddings_folder):
+                resolved_path = file_path
+            else:
+                # Otherwise, it might be just a filename or relative path, so resolve it
+                embeddings_path = get_embeddings_file_path(file_path)
+                
+                # Check if the resolved embeddings path exists
+                if os.path.exists(embeddings_path):
+                    resolved_path = embeddings_path
+                else:
+                    # Last resort: Check if the file exists in the base folder
+                    if os.path.exists(file_path):
+                        resolved_path = file_path
+                    else:
+                        # If still not found, use the standard embeddings path (which might not exist)
+                        resolved_path = embeddings_path
+        
         # Use specified database or fall back to preferred endpoint
         endpoint_name = database or CONFIG.preferred_retrieval_endpoint
         
         print(f"Loading data with embeddings from {resolved_path} for site {site} using database endpoint '{endpoint_name}'")
+        
+        # Check if resolved path exists
+        if not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"File not found: {resolved_path}")
         
         # Delete existing entries for this site if requested
         if delete_existing:
@@ -617,12 +646,19 @@ async def loadJsonToDB(file_path: str, site: str, batch_size: int = 500, delete_
         original_path = file_path  # Use original path for non-URLs
     
     try:
-        # Resolve the file path for the input file
-        if os.path.isabs(file_path) or os.path.exists(file_path):
-            resolved_path = file_path  # Use directly if it's an absolute path or exists
+        # First, check if the file exists at the given path
+        if os.path.exists(file_path):
+            resolved_path = file_path  # Use directly if it exists
         else:
-            # Otherwise assume it's in the JSON data folder
+            # If not, try to resolve it from the JSON data folder
             resolved_path = os.path.join(CONFIG.nlweb.json_data_folder, file_path)
+            if not os.path.exists(resolved_path):
+                # If still not found, check if it's an absolute path
+                if os.path.isabs(file_path):
+                    resolved_path = file_path
+                else:
+                    # Last attempt: just use the provided path (might not exist)
+                    resolved_path = file_path
         
         # Use specified database or fall back to preferred endpoint
         endpoint_name = database or CONFIG.preferred_retrieval_endpoint
@@ -1028,6 +1064,10 @@ async def main():
         return
     
     # Normal processing mode
+    # Check if file exists at the specified path
+    if not await is_url(args.file_path) and not os.path.exists(args.file_path):
+        print(f"Warning: File not found at '{args.file_path}'. Will try to resolve or download it.")
+    
     # Determine if the file is a URL
     is_url_path = await is_url(args.file_path)
     temp_path = None
@@ -1041,17 +1081,20 @@ async def main():
     
     try:
         # Detect file type and if it contains embeddings
-        file_type, has_embeddings = await detect_file_type(file_path)
-        
-        print(f"Detected file type: {file_type}, contains embeddings: {'Yes' if has_embeddings else 'No'}")
-        
-        # Process based on whether the file has embeddings
-        if has_embeddings and not args.force_recompute:
-            print("File already contains embeddings, loading directly...")
-            await loadJsonWithEmbeddingsToDB(file_path, args.site, args.batch_size, args.delete_site, args.database)
+        if os.path.exists(file_path):
+            file_type, has_embeddings = await detect_file_type(file_path)
+            print(f"Detected file type: {file_type}, contains embeddings: {'Yes' if has_embeddings else 'No'}")
+            
+            # Process based on whether the file has embeddings
+            if has_embeddings and not args.force_recompute:
+                print("File already contains embeddings, loading directly...")
+                await loadJsonWithEmbeddingsToDB(file_path, args.site, args.batch_size, args.delete_site, args.database)
+            else:
+                print("Computing embeddings for file...")
+                await loadJsonToDB(file_path, args.site, args.batch_size, args.delete_site, args.force_recompute, args.database)
         else:
-            print("Computing embeddings for file...")
-            await loadJsonToDB(file_path, args.site, args.batch_size, args.delete_site, args.force_recompute, args.database)
+            print(f"Error: File not found at '{file_path}'")
+            sys.exit(1)
     finally:
         # Clean up temporary file if needed
         if temp_path and os.path.exists(temp_path):
