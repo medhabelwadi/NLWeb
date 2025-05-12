@@ -2,42 +2,53 @@ preferred_endpoint: azure_ai_search_1
 
 endpoints:
   azure_ai_search_1:
-    api_key_env: AZURE_VECTOR_SEARCH_API_KEY
-    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
+    api_key_env: AZURE_VECTOR_SEARCH_API_KEY_1
+    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT_1
     index_name: embeddings1536
     db_type: azure_ai_search
     name: NLWeb_Crawl
 
   azure_ai_search_2:
-    api_key_env: AZURE_VECTOR_SEARCH_API_KEY
-    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
+    api_key_env: AZURE_VECTOR_SEARCH_API_KEY_2
+    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT_2
     index_name: embeddings1536
     db_type: azure_ai_search
     name: Bing_Crawl
       
+  azure_ai_search_test:
+    api_key_env: AZURE_VECTOR_SEARCH_API_KEY_TEST
+    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT_TEST
+    index_name: embeddings1536
+    db_type: azure_ai_search
+    name: NLWeb_Upload_Test
 
   milvus_1:
     database_path: ../milvus/milvus_prod.db
     index_name: prod_collection
     db_type: milvus
 
+  # Option 1: Local file-based Qdrant storage
+  qdrant_local:
+    # Use local file-based storage with a specific path
+    database_path: "../data/db"
+    # Set the collection name to use
+    index_name: nlweb_collection
+    # Specify the database type
+    db_type: qdrant
+    
+  # Option 2: Remote Qdrant server
+  qdrant_url:
+    # Connect to a Qdrant server at a specific URL
+    api_endpoint_env: QDRANT_URL
+    # Optional API key for authentication
+    api_key_env: QDRANT_API_KEY
+    # Set the collection name to use
+    index_name: nlweb_collection
+    # Specify the database type
+    db_type: qdrant
 
   snowflake_cortex_search_1:
     api_endpoint_env: SNOWFLAKE_ACCOUNT_URL
     index_name: SNOWFLAKE_CORTEX_SEARCH_SERVICE
     db_type: snowflake_cortex_search
 
-  qdrant:
-    # To connect to a Qdrant server, set the `QDRANT_URL` and optionally `QDRANT_API_KEY`.
-    # > docker run -p 6333:6333 qdrant/qdrant
-    # QDRANT_URL="http://localhost:6333"
-    api_endpoint_env: QDRANT_URL
-    api_key_env: QDRANT_API_KEY
-
-    # To use a local persistent instance for prototyping,
-    # set database_path to a local directory
-    database_path: "/path/to/some/directory"
-
-    # Set the name of the collection to use as `index_name`
-    index_name: nlweb_collection
-    db_type: qdrant

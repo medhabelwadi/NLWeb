@@ -8,7 +8,7 @@ WARNING: This code is under development and may undergo changes in future releas
 Backwards compatibility is not guaranteed at this time.
 """
 
-from retrieval.retriever import DBQueryRetriever
+from retrieval.retriever import get_vector_db_client
 import asyncio
 import pre_retrieval.decontextualize as decontextualize
 import pre_retrieval.analyze_query as analyze_query
@@ -215,7 +215,8 @@ class NLWebHandler:
         # Wait for retrieval to be done
         if not self.retrieval_done_event.is_set():
             logger.info("Retrieval not done by fast track, performing regular retrieval")
-            items = await DBQueryRetriever(self.decontextualized_query, self).do()
+            client = get_vector_db_client(query_params=self.query_params)
+            items = await client.search(self.decontextualized_query, self.site)
             self.final_retrieved_items = items
             logger.debug(f"Retrieved {len(items)} items from database")
             self.retrieval_done_event.set()
