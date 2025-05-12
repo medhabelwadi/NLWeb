@@ -385,7 +385,7 @@ export class ChatInterface {
   addVisibleUrl(item, contentDiv) {
     const visibleUrlLink = document.createElement("a");
     // Sanitize URL
-    visibleUrlLink.href = item.siteUrl ? escapeHtml(item.siteUrl) : '#';
+    visibleUrlLink.href = item.siteUrl && this.isTrustedUrl(item.siteUrl) ? item.siteUrl : '#';
     // Use textContent for safe insertion
     visibleUrlLink.textContent = item.site || '';
     visibleUrlLink.className = 'item-site-link';
@@ -765,5 +765,21 @@ export class ChatInterface {
    */
   createDebugString() {
     return jsonLdToHtml(this.currentItems);
+  }
+  /**
+   * Validates if a URL belongs to a trusted domain
+   * 
+   * @param {string} url - The URL to validate
+   * @returns {boolean} - True if the URL is trusted, false otherwise
+   */
+  isTrustedUrl(url) {
+    try {
+      const trustedDomains = ['example.com', 'trustedsite.org']; // Add trusted domains here
+      const parsedUrl = new URL(url);
+      return trustedDomains.includes(parsedUrl.hostname);
+    } catch (e) {
+      console.error('Invalid URL:', e);
+      return false;
+    }
   }
 }
