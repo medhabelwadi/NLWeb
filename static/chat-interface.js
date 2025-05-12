@@ -385,7 +385,7 @@ export class ChatInterface {
   addVisibleUrl(item, contentDiv) {
     const visibleUrlLink = document.createElement("a");
     // Sanitize URL
-    visibleUrlLink.href = item.siteUrl && this.isTrustedUrl(item.siteUrl) ? item.siteUrl : '#';
+    visibleUrlLink.href = item.siteUrl && this.isTrustedUrl(item.siteUrl) ? escapeHtml(item.siteUrl) : '#';
     // Use textContent for safe insertion
     visibleUrlLink.textContent = item.site || '';
     visibleUrlLink.className = 'item-site-link';
