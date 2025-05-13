@@ -119,12 +119,12 @@ async def get_embedding(
         if provider == "snowflake":
             logger.debug("Getting Snowflake embeddings")
             # Import here to avoid potential circular imports
-            from embedding.snowflake_embedding import get_snowflake_embeddings
+            from embedding.snowflake_embedding import cortex_embed
             result = await asyncio.wait_for(
-                get_snowflake_embeddings(text, model=model_id),
+                cortex_embed(text, model=model_id),
                 timeout=timeout
             )
-            logger.debug(f"Snowflake embeddings received, dimension: {len(result)}")
+            logger.debug(f"Snowflake Cortex embeddings received, dimension: {len(result)}")
             return result
 
         error_msg = f"No embedding implementation for provider '{provider}'"
