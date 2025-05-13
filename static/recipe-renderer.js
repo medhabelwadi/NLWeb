@@ -65,7 +65,7 @@ export class RecipeRenderer {
         
         // Check both review array length and reviewCount property, use the higher value
         const reviewArrayCount = schema.review ? schema.review.length : 0;
-        const ratingObjectCount = schema.aggregateRating.reviewCount ? parseInt(schema.aggregateRating.reviewCount, 10) : 0;
+        const ratingObjectCount = schema.aggregateRating.ratingCount ? parseInt(schema.aggregateRating.ratingCount, 10) : 0;
         const reviewCount = Math.max(reviewArrayCount, ratingObjectCount);
         
         const ratingDiv = document.createElement('div');
