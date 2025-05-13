@@ -6,6 +6,11 @@ vars:
   GREETING: Welcome to NL Web!
 
 tasks:
+  deps:
+    cmds:
+      - echo "Installing dependencies..."
+      - pip install -r requirements.txt
+    dir: ./code
   check:
     cmds:
       - python azure-connectivity.py 

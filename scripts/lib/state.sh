@@ -30,7 +30,7 @@ function load_deployment_state() {
     
     if [ ! -f "$deployment_file" ]; then
         echo -e "${RED}Error: Deployment file not found: $deployment_file${NC}"
-        return 1
+        exit 1
     fi
     
     _debug "> Loading deployment state from $deployment_file"

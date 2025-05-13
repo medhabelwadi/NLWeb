@@ -147,10 +147,10 @@ function populate_env_file(){
     fetch_secret_from_keyvault "$SEARCH_API_KEY_SECRET_NAME" "SEARCH_API_KEY"
 
     # replace placeholders from env template file
-    sed -i "s|^AZURE_OPENAI_API_KEY=\"TODO\"|AZURE_OPENAI_API_KEY=\"$open_ai_primary_key\"|" ../code/.env 
+    sed -i "s|^AZURE_OPENAI_API_KEY=\"<TODO>\"|AZURE_OPENAI_API_KEY=\"$open_ai_primary_key\"|" ../code/.env 
     sed -i "s|^AZURE_OPENAI_ENDPOINT=\"https://TODO.openai.azure.com/\"|AZURE_OPENAI_ENDPOINT=\"$open_ai_endpoint\"|" ../code/.env
-    sed -i "s|^AZURE_VECTOR_SEARCH_API_KEY=\"TODO\"|AZURE_VECTOR_SEARCH_API_KEY=\"$SEARCH_API_KEY\"|" ../code/.env 
-    sed -i "s|^AZURE_VECTOR_SEARCH_ENDPOINT=\"https://TODO.search.windows.net\"|AZURE_VECTOR_SEARCH_ENDPOINT=\"$SEARCH_ENDPOINT\"|" ../code/.env
+    sed -i "s|^AZURE_VECTOR_SEARCH_API_KEY_1=\"<TODO>\"|AZURE_VECTOR_SEARCH_API_KEY_1=\"$SEARCH_API_KEY\"|" ../code/.env 
+    sed -i "s|^AZURE_VECTOR_SEARCH_ENDPOINT_1=\"https://TODO.search.windows.net\"|AZURE_VECTOR_SEARCH_ENDPOINT_1=\"$SEARCH_ENDPOINT\"|" ../code/.env
 }
 
 
@@ -174,40 +174,40 @@ function configure_env_file(){
 
     # Check if any of the required Azure KeyVault variables are set to "TODO"
     local error_found=false
-    local error_message="${RED}Error: The following required variables still have placeholder values:${NC}\n"
+    local error_message="${RED}Error: The following required environment variables do not have values:${NC}\n"
     
-    if [ "$azure_keyvault_name" = "TODO" ]; then
+    if [ -z "$AZURE_KEYVAULT_NAME" ]; then
         error_message+="  - ${YELLOW}AZURE_KEYVAULT_NAME${NC}\n"
         error_found=true
     fi
     
-    if [ "$azure_keyvault_resource_group" = "TODO" ]; then
+    if [ -z "$AZURE_KEYVAULT_RESOURCE_GROUP" ]; then
         error_message+="  - ${YELLOW}AZURE_KEYVAULT_RESOURCE_GROUP${NC}\n"
         error_found=true
     fi
     
-    if [ "$search_endpoint_secret_name" = "TODO" ]; then
+    if [  -z "$SEARCH_ENDPOINT_SECRET_NAME" ]; then
         error_message+="  - ${YELLOW}SEARCH_ENDPOINT_SECRET_NAME${NC}\n"
         error_found=true
     fi
     
-    if [ "$search_api_key_secret_name" = "TODO" ]; then
+    if [ -z "$SEARCH_API_KEY_SECRET_NAME" ]; then
         error_message+="  - ${YELLOW}SEARCH_API_KEY_SECRET_NAME${NC}\n"
         error_found=true
     fi
 
     if [ "$error_found" = true ]; then
         _error "$error_message"
-        _error "Please update the file ${CYAN}../code/.env.template${NC} ${RED}file with the missing settings.\nNote: You only need to include values for the #Key Vault Settings# block, the rest will be populated by this setup script."
+        _error "Please configure the missing environment variables."
         exit 1
     fi
 
     # Debug output if needed
     if [ "$DEBUG" = true ]; then
-        _debug "Key Vault Name: $azure_keyvault_name"
-        _debug "Key Vault Resource Group: $azure_keyvault_resource_group"
-        _debug "Search Endpoint Secret Name: $search_endpoint_secret_name"
-        _debug "Search API Key Secret Name: $search_api_key_secret_name"
+        _debug "Key Vault Name: $AZURE_KEYVAULT_NAME"
+        _debug "Key Vault Resource Group: $AZURE_KEYVAULT_RESOURCE_GROUP"
+        _debug "Search Endpoint Secret Name: $SEARCH_ENDPOINT_SECRET_NAME"
+        _debug "Search API Key Secret Name: $SEARCH_API_KEY_SECRET_NAME"
         
         # Mask sensitive information
         _info_mask "Azure Vector Search API Key:" "$azure_vector_search_api_key"
@@ -215,10 +215,10 @@ function configure_env_file(){
     fi
     
     # Export variables to make them available to the rest of the script
-    export AZURE_KEYVAULT_NAME="$azure_keyvault_name"
-    export AZURE_KEYVAULT_RESOURCE_GROUP="$azure_keyvault_resource_group"
-    export SEARCH_ENDPOINT_SECRET_NAME="$search_endpoint_secret_name"
-    export SEARCH_API_KEY_SECRET_NAME="$search_api_key_secret_name"
+    # export AZURE_KEYVAULT_NAME="$azure_keyvault_name"
+    # export AZURE_KEYVAULT_RESOURCE_GROUP="$azure_keyvault_resource_group"
+    # export SEARCH_ENDPOINT_SECRET_NAME="$search_endpoint_secret_name"
+    # export SEARCH_API_KEY_SECRET_NAME="$search_api_key_secret_name"
     
     return 0
 }
