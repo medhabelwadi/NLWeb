@@ -5,6 +5,7 @@
 sites: "imdb,nytimes,verge,delish,alltrails,allbirds,seriouseats,oreilly,npr podcasts,backcountry,neurips,zillow,eventbrite,tripadvisor,woksoflife,cheftariq,hebbarskitchen,scifi_movies,latam_recipes,spruce,commonsensemedia"
 #sites: "yoursite"
 
+
 # Data folders for JSON files and embeddings
 data_folders:
   json_data: "../data/json"
