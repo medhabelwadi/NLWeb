@@ -58,7 +58,7 @@ export class JsonRenderer {
     // Check if there's a type-specific renderer
     if (item.schema_object && item.schema_object['@type']) {
       const type = item.schema_object['@type'];
-      if (this.typeRenderers[type]) {
+      if (Object.prototype.hasOwnProperty.call(this.typeRenderers, type) && typeof this.typeRenderers[type] === 'function') {
         return this.typeRenderers[type](item, this);
       }
     }
