@@ -228,8 +228,7 @@ export class DropdownInterface {
    */
   getSites() {
     return [
-
-      'imdb', 'nytimes', 'verge','delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
+      'scifi_movies','imdb', 'nytimes', 'verge','delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
       'npr podcasts', 'backcountry', 'bc_product', 'neurips', 'zillow', 'eventbrite',
       'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',
       'latam_recipes', 'spruce', 'med podcast', 'allbirdsdd', 'all'
