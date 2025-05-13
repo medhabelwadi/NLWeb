@@ -48,6 +48,7 @@ endpoints:
     db_type: qdrant
 
   snowflake_cortex_search_1:
+    api_key_env: SNOWFLAKE_PAT
     api_endpoint_env: SNOWFLAKE_ACCOUNT_URL
     index_name: SNOWFLAKE_CORTEX_SEARCH_SERVICE
     db_type: snowflake_cortex_search

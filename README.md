@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
    If you want to use the Azure OpenAI service, follow the instructions below at [Azure OpenAI endpoint creation instructions](#azure-openai-endpoint-creation).  If you are participating in the private preview, the Azure AI Search API keys will be provided for you in a separate document.
 
-   If you want to use Snowflake services, follow the instructions at [docs/Snowflake.md](docs\Snowflake.md).
+   If you want to use Snowflake services, follow the instructions at [docs/Snowflake.md](docs/Snowflake.md).
 
    Then, copy the `.env.template` file into a new file named `.env` and add your keys for this resource into the .env file.
 
