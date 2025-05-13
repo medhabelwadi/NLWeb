@@ -4,8 +4,8 @@
  */
 
 import { ManagedEventSource } from './managed-event-source.js';
-import { jsonLdToHtml, escapeHtml } from './utils.js';
-
+import { JsonRenderer, TypeRendererFactory, jsonLdToHtml, escapeHtml } from './utils.js';
+import { RecipeRenderer } from './recipe-renderer.js'; 
 
 export class ChatInterface {
   /**
@@ -25,6 +25,11 @@ export class ChatInterface {
     this.dotsStillThere = false;
     this.debug_mode = false;
     
+    // Create JSON renderer
+    this.jsonRenderer = new JsonRenderer();
+    TypeRendererFactory.registerAll(this.jsonRenderer);
+    TypeRendererFactory.registerRenderer(RecipeRenderer, this.jsonRenderer);
+  
     // Parse URL parameters
     this.parseUrlParams();
     
@@ -307,113 +312,9 @@ export class ChatInterface {
    * @returns {HTMLElement} - The HTML element
    */
   createJsonItemHtml(item) {
-    // Safely create container elements
-    const container = document.createElement('div');
-    container.className = 'item-container';
-
-    // Left content div (title + description)
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'item-content';
-
-    // Title row with link and info icon
-    this.createTitleRow(item, contentDiv);
-
-    // Description
-    const description = document.createElement('div');
-    // Use textContent for safe insertion of description
-    description.textContent = item.description || '';
-    description.className = 'item-description';
-    contentDiv.appendChild(description);
-
-    // For NL web search display mode
-    if (this.display_mode === "nlwebsearch") {
-      this.addVisibleUrl(item, contentDiv);
-    }
-    
-    // Add type-specific content
-    this.typeSpecificContent(item, contentDiv);
-
-    container.appendChild(contentDiv);
-
-    // Add image if available
-    this.addImageIfAvailable(item, container);
-
-    return container;
+    return this.jsonRenderer.createJsonItemHtml(item);
   }
-  
-  /**
-   * Creates a title row for an item
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} contentDiv - The content div
-   */
-  createTitleRow(item, contentDiv) {
-    const titleRow = document.createElement('div');
-    titleRow.className = 'item-title-row';
 
-    // Title/link
-    const titleLink = document.createElement('a');
-    titleLink.href = item.url ? escapeHtml(item.url) : '#'; // Sanitize URL
-    const itemName = this.getItemName(item);
-    // Safe text insertion
-    titleLink.textContent = itemName;
-    titleLink.className = 'item-title-link';
-    titleRow.appendChild(titleLink);
-
-    // Info icon
-    const infoIcon = document.createElement('span');
-    // Use a safer way to create the icon
-    const imgElement = document.createElement('img');
-    imgElement.src = 'images/info.png';
-    imgElement.alt = 'Info';
-    infoIcon.appendChild(imgElement);
-    
-    infoIcon.className = 'item-info-icon';
-    // Sanitize tooltip content
-    infoIcon.title = `${escapeHtml(item.explanation || '')} (score=${item.score || 0}) (Ranking time=${item.time || 0})`;
-    titleRow.appendChild(infoIcon);
-
-    contentDiv.appendChild(titleRow);
-  }
-  
-  /**
-   * Adds a visible URL to the content div
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} contentDiv - The content div
-   */
-  addVisibleUrl(item, contentDiv) {
-    const visibleUrlLink = document.createElement("a");
-    // Sanitize URL
-    visibleUrlLink.href = item.siteUrl ? escapeHtml(item.siteUrl) : '#';
-    // Use textContent for safe insertion
-    visibleUrlLink.textContent = item.site || '';
-    visibleUrlLink.className = 'item-site-link';
-    contentDiv.appendChild(visibleUrlLink);
-  }
-  
-  /**
-   * Adds an image to the item if available
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} container - The container element
-   */
-  addImageIfAvailable(item, container) {
-    if (item.schema_object) {
-      const imgURL = this.extractImage(item.schema_object);
-      if (imgURL) {
-        const imageDiv = document.createElement('div');
-        const img = document.createElement('img');
-        // Sanitize URL
-        img.src = escapeHtml(imgURL);
-        img.alt = 'Item image';
-        img.className = 'item-image';
-        imageDiv.appendChild(img);
-        container.appendChild(imageDiv);
-      }
-    }
-  }
-  
   /**
    * Gets the name of an item
    * 
@@ -421,166 +322,7 @@ export class ChatInterface {
    * @returns {string} - The item name
    */
   getItemName(item) {
-    let name = '';
-    if (item.name) {
-      name = item.name;
-    } else if (item.schema_object && item.schema_object.keywords) {
-      name = item.schema_object.keywords;
-    } else if (item.url) {
-      name = item.url;
-    }
-    return name;
-  }
-  
-  /**
-   * Adds type-specific content to the item
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} contentDiv - The content div
-   */
-  typeSpecificContent(item, contentDiv) {
-    if (!item.schema_object) {
-      return;
-    }
-    
-    const objType = item.schema_object['@type'];
-    const houseTypes = ["SingleFamilyResidence", "Apartment", "Townhouse", "House", "Condominium", "RealEstateListing"];
-    
-    if (objType === "PodcastEpisode") {
-      this.possiblyAddExplanation(item, contentDiv, true);
-      return;
-    }
-    
-    if (houseTypes.includes(objType)) {
-      this.addRealEstateDetails(item, contentDiv);
-    }
-  }
-  
-  /**
-   * Adds real estate details to an item
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} contentDiv - The content div
-   */
-  addRealEstateDetails(item, contentDiv) {
-    const detailsDiv = this.possiblyAddExplanation(item, contentDiv, true);
-    detailsDiv.className = 'item-real-estate-details';
-    
-    const schema = item.schema_object;
-    if (!schema) return;
-    
-    const price = schema.price;
-    const address = schema.address || {};
-    const numBedrooms = schema.numberOfRooms;
-    const numBathrooms = schema.numberOfBathroomsTotal;
-    const sqft = schema.floorSize?.value;
-    
-    let priceValue = price;
-    if (typeof price === 'object') {
-      priceValue = price.price || price.value || price;
-      if (typeof priceValue === 'number') {
-        priceValue = Math.round(priceValue / 100000) * 100000;
-        priceValue = priceValue.toLocaleString('en-US');
-      }
-    }
-
-    const streetAddress = address.streetAddress || '';
-    const addressLocality = address.addressLocality || '';
-    detailsDiv.appendChild(this.makeAsSpan(`${streetAddress}, ${addressLocality}`));
-    detailsDiv.appendChild(document.createElement('br'));
-    
-    const bedroomsText = numBedrooms || '0';
-    const bathroomsText = numBathrooms || '0';
-    const sqftText = sqft || '0';
-    detailsDiv.appendChild(this.makeAsSpan(`${bedroomsText} bedrooms, ${bathroomsText} bathrooms, ${sqftText} sqft`));
-    detailsDiv.appendChild(document.createElement('br'));
-    
-    if (priceValue) {
-      detailsDiv.appendChild(this.makeAsSpan(`Listed at ${priceValue}`));
-    }
-  }
-  
-  /**
-   * Creates a span element with the given content
-   * 
-   * @param {string} content - The content for the span
-   * @returns {HTMLElement} - The span element
-   */
-  makeAsSpan(content) {
-    const span = document.createElement('span');
-    // Use textContent for safe insertion
-    span.textContent = content;
-    span.className = 'item-details-text';
-    return span;
-  }
-
-  /**
-   * Adds an explanation to an item
-   * 
-   * @param {Object} item - The item data
-   * @param {HTMLElement} contentDiv - The content div
-   * @param {boolean} force - Whether to force adding the explanation
-   * @returns {HTMLElement} - The details div
-   */
-  possiblyAddExplanation(item, contentDiv, force = false) {
-    const detailsDiv = document.createElement('div'); 
-    contentDiv.appendChild(document.createElement('br'));
-    const explSpan = this.makeAsSpan(item.explanation || '');
-    explSpan.className = 'item-explanation';
-    detailsDiv.appendChild(explSpan);
-    contentDiv.appendChild(detailsDiv);
-    return detailsDiv;
-  }
-
-  /**
-   * Extracts an image URL from a schema object
-   * 
-   * @param {Object} schema_object - The schema object
-   * @returns {string|null} - The image URL or null
-   */
-  extractImage(schema_object) {
-    if (schema_object && schema_object.image) {
-      return this.extractImageInternal(schema_object.image);
-    }
-    return null;
-  }
-
-  /**
-   * Extracts an image URL from various image formats
-   * 
-   * @param {*} image - The image data
-   * @returns {string|null} - The image URL or null
-   */
-  extractImageInternal(image) {
-    if (typeof image === 'string') {
-      return image;
-    } else if (typeof image === 'object' && image.url) {
-      return image.url;
-    } else if (typeof image === 'object' && image.contentUrl) {
-      return image.contentUrl;
-    } else if (Array.isArray(image)) {
-      if (image[0] && typeof image[0] === 'string') {
-        return image[0];
-      } else if (image[0] && typeof image[0] === 'object') {
-        return this.extractImageInternal(image[0]);
-      }
-    } 
-    return null;
-  }
-
-  /**
-   * Unescapes HTML entities in a string
-   * 
-   * @param {string} str - The string to unescape
-   * @returns {string} - The unescaped string
-   */
-  htmlUnescape(str) {
-    // Using a safer approach with DOMParser
-    if (!str || typeof str !== 'string') return '';
-    
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(`<!DOCTYPE html><body>${str}`, 'text/html');
-    return doc.body.textContent || '';
+    return this.jsonRenderer.getItemName(item);
   }
 
   /**

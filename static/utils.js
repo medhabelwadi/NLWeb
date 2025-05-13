@@ -2,6 +2,10 @@
  * Utility functions for the streaming chat interface
  */
 
+// Import the JsonRenderer and type renderer classes
+import { JsonRenderer } from './json-renderer.js';
+import { TypeRendererFactory } from './type-renderers.js';
+
 /**
  * Escapes HTML special characters in a string
  * 
@@ -26,84 +30,9 @@ export function escapeHtml(str) {
  * @returns {string} - HTML representation of the JSON-LD
  */
 export function jsonLdToHtml(jsonLd) {
-  // Helper function to format a single value
-  const formatValue = (value, indent) => {
-    const spaces = '  '.repeat(indent);
-    
-    if (value === null) {
-      return `<span class="null">null</span>`;
-    }
-    
-    switch (typeof value) {
-      case 'string':
-        // Special handling for URLs and IRIs in JSON-LD
-        if (value.startsWith('http://') || value.startsWith('https://')) {
-          return `<span class="string url">"${escapeHtml(value)}"</span>`;
-        }
-        return `<span class="string">"${escapeHtml(value)}"</span>`;
-      case 'number':
-        return `<span class="number">${value}</span>`;
-      case 'boolean':
-        return `<span class="boolean">${value}</span>`;
-      case 'object':
-        if (Array.isArray(value)) {
-          if (value.length === 0) return '[]';
-          const items = value.map(item => 
-            `${spaces}  ${formatValue(item, indent + 1)}`
-          ).join(',\n');
-          return `[\n${items}\n${spaces}]`;
-        }
-        return formatObject(value, indent);
-      default:
-        return `<span class="unknown">${escapeHtml(String(value))}</span>`;
-    }
-  };
-
-  // Helper function to format an object
-  const formatObject = (obj, indent = 0) => {
-    const spaces = '  '.repeat(indent);
-    
-    if (!obj || Object.keys(obj).length === 0) return '{}';
-    
-    const entries = Object.entries(obj).map(([key, value]) => {
-      // Special handling for JSON-LD keywords (starting with @)
-      const keySpan = key.startsWith('@') 
-        ? `<span class="keyword">"${escapeHtml(key)}"</span>`
-        : `<span class="key">"${escapeHtml(key)}"</span>`;
-        
-      return `${spaces}  ${keySpan}: ${formatValue(value, indent + 1)}`;
-    });
-    
-    return `{\n${entries.join(',\n')}\n${spaces}}`;
-  };
-
-  // Main formatting logic
-  try {
-    const parsed = (typeof jsonLd === 'string') ? JSON.parse(jsonLd) : jsonLd;
-    const formatted = formatObject(parsed);
-    
-    // Return complete HTML with styling
-    return `<pre class="json-ld"><code>${formatted}</code></pre>
-<style>
-.json-ld {
-  background-color: #f5f5f5;
-  padding: 1em;
-  border-radius: 4px;
-  font-family: monospace;
-  line-height: 1.5;
-}
-.json-ld .keyword { color: #e91e63; }
-.json-ld .key { color: #2196f3; }
-.json-ld .string { color: #4caf50; }
-.json-ld .string.url { color: #9c27b0; }
-.json-ld .number { color: #ff5722; }
-.json-ld .boolean { color: #ff9800; }
-.json-ld .null { color: #795548; }
-.json-ld .unknown { color: #607d8b; }
-</style>`;
-  } catch (error) {
-    return `<pre class="json-ld error">Error: ${escapeHtml(error.message)}</pre>`;
-  }
+  const renderer = new JsonRenderer();
+  TypeRendererFactory.registerAll(renderer);
+  return renderer.render(jsonLd);
 }
 
 /**
@@ -119,6 +48,10 @@ export function htmlUnescape(str) {
   const doc = parser.parseFromString(`<!DOCTYPE html><body>${str}`, 'text/html');
   return doc.body.textContent || '';
 }
+
+// Re-export the JsonRenderer and type renderer classes
+export { JsonRenderer } from './json-renderer.js';
+export { TypeRenderer, RealEstateRenderer, PodcastEpisodeRenderer, TypeRendererFactory } from './type-renderers.js';
 
 /**
  * Creates a random ID
