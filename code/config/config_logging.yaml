@@ -54,7 +54,7 @@ logging:
       default_level: ERROR
       log_file: "decontextualizer.log"
 
-    decontextualizer:
+    required_info:
       env_var: "REQUIRED_INFO_LOG_LEVEL"
       default_level: ERROR
       log_file: "required_info.log"
