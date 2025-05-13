@@ -508,4 +508,25 @@ export class ChatInterface {
   createDebugString() {
     return jsonLdToHtml(this.currentItems);
   }
+  
+  /**
+   * Sanitizes a URL to prevent javascript: protocol and other potentially dangerous URLs
+   * 
+   * @param {string} url - The URL to sanitize
+   * @returns {string} - The sanitized URL
+   */
+  sanitizeUrl(url) {
+    if (!url || typeof url !== 'string') return '#';
+    
+    // Remove leading and trailing whitespace
+    const trimmedUrl = url.trim();
+    
+    // Check for javascript: protocol or other dangerous protocols
+    const protocolPattern = /^(javascript|data|vbscript|file):/i;
+    if (protocolPattern.test(trimmedUrl)) {
+      return '#';
+    }
+    
+    return trimmedUrl;
+  }
 }
