@@ -353,7 +353,20 @@ export class ChatInterface {
 
     // Title/link
     const titleLink = document.createElement('a');
-    titleLink.href = item.url ? escapeHtml(item.url) : '#'; // Sanitize URL
+    // Fix: Validate URL protocol before setting href
+    if (item.url) {
+      const sanitizedUrl = escapeHtml(item.url);
+      // Only allow http: and https: protocols
+      if (sanitizedUrl.startsWith('http://') || sanitizedUrl.startsWith('https://')) {
+        titleLink.href = sanitizedUrl;
+      } else {
+        titleLink.href = '#'; // Default to # for invalid URLs
+        console.warn('Blocked potentially unsafe URL:', sanitizedUrl);
+      }
+    } else {
+      titleLink.href = '#';
+    }
+    
     const itemName = this.getItemName(item);
     // Safe text insertion
     titleLink.textContent = itemName;
@@ -384,8 +397,27 @@ export class ChatInterface {
    */
   addVisibleUrl(item, contentDiv) {
     const visibleUrlLink = document.createElement("a");
-    // Sanitize URL
-    visibleUrlLink.href = item.siteUrl && this.isTrustedUrl(item.siteUrl) ? escapeHtml(item.siteUrl) : '#';
+    
+    // Fix: Properly validate URL protocol before setting href
+    if (item.siteUrl) {
+      const sanitizedUrl = escapeHtml(item.siteUrl);
+      // Only allow http: and https: protocols
+      if (sanitizedUrl.startsWith('http://') || sanitizedUrl.startsWith('https://')) {
+        // Additionally check if it's from a trusted domain
+        if (this.isTrustedUrl(sanitizedUrl)) {
+          visibleUrlLink.href = sanitizedUrl;
+        } else {
+          visibleUrlLink.href = '#'; // Default to # for untrusted domains
+          console.warn('Blocked untrusted domain URL:', sanitizedUrl);
+        }
+      } else {
+        visibleUrlLink.href = '#'; // Default to # for invalid protocols
+        console.warn('Blocked potentially unsafe URL protocol:', sanitizedUrl);
+      }
+    } else {
+      visibleUrlLink.href = '#';
+    }
+    
     // Use textContent for safe insertion
     visibleUrlLink.textContent = item.site || '';
     visibleUrlLink.className = 'item-site-link';
@@ -404,12 +436,21 @@ export class ChatInterface {
       if (imgURL) {
         const imageDiv = document.createElement('div');
         const img = document.createElement('img');
-        // Sanitize URL
-        img.src = escapeHtml(imgURL);
-        img.alt = 'Item image';
-        img.className = 'item-image';
-        imageDiv.appendChild(img);
-        container.appendChild(imageDiv);
+        
+        // Fix: Validate URL protocol before setting src
+        const sanitizedUrl = escapeHtml(imgURL);
+        // Only allow safe protocols for images: http, https, and data
+        if (sanitizedUrl.startsWith('http://') || 
+            sanitizedUrl.startsWith('https://') || 
+            sanitizedUrl.startsWith('data:image/')) {
+          img.src = sanitizedUrl;
+          img.alt = 'Item image';
+          img.className = 'item-image';
+          imageDiv.appendChild(img);
+          container.appendChild(imageDiv);
+        } else {
+          console.warn('Blocked potentially unsafe image URL:', sanitizedUrl);
+        }
       }
     }
   }
