@@ -266,7 +266,7 @@ class VectorDBClient:
 
         if (site == "all"):
             sites = CONFIG.nlweb.sites
-            if (len(sites) == 0):
+            if (len(sites) == 0 or sites == "all"):
                 return await self.search_all_sites(query, num_results, **kwargs)
             else:
                 site = sites
