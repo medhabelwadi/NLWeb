@@ -13,6 +13,9 @@ In its basic mode, NLWeb will return a subset of the list of items in the
 database. Consequently strong assurances can be made that it will not 'make up'
 items that don't exist, an essential requirement for many applications.
 
+
+
+# NLWeb and platforms.
 NLWeb is deeply agnostic:
 - About the platform. We have tested it running on Windows, MacOS, Linux, Azure ...
 - About the vector stores used --- Qdrant, Snowflake, Milvus, Azure AI Search, ...
@@ -23,10 +26,21 @@ NLWeb is deeply agnostic:
 # How it Works
  At a high level, NLWeb follows the pattern used in modern search engines --- a retrieval
  process involving relatively cheap ranking (in our case, with embeddings in vector
- databases) followed by 'deeper' ranking (in our ase, with llms). It does not use
+ databases) followed by 'deeper' ranking (in our case, with LLMs). It does not use
  'traditional' RAG which can sometime hallucinate. More on how it works is here.
 
+ A simple 'list of items' as an answer is just a very early very small step. We hope that
+this will evolve answers with richer structures, much like how the Web evolved
+from pages that did not even have inline images to the much richer structures
+of today.
+
+
 # NLWeb and MCP
+ MCP (Model Context Protocol) is an emerging protocol for Chatbots and AI assistants
+ to interact with tools. Every NLWeb instance is also an MCP server, which supports one method,
+ <code>ask</code>, which is used to ask a website a question in natural language. The returned response
+ is in schema.org, a widely-used vocabulary for describing web data.
+
 
 # Repository
 This repository contains the following:
@@ -34,12 +48,14 @@ This repository contains the following:
 - the code for the core service -- handling a natural language query. See below for documentation
   on how this can be extended / customized
 - connectors to some of the popular LLMs and vector databases. See documentation on how to add more.
-- tools for adding data in schema.org jsonl, RSS, etc. to a vector databaes of choice
+- tools for adding data in schema.org jsonl, RSS, etc. to a vector database of choice
 - a web server front end for this service, which being small enough runs in the web server
 - a simple UI for enabling users to issue queries via this web server
 
 We expect most production deployments to use their own UI. They are also likely to integrate
-the code into their application environment (as opposed to running a standalone NLWeb server).
+the code into their application environment (as opposed to running a standalone NLWeb server). They
+are also encouraged to connect NLWeb to their 'live' database as opposed to copying
+the contents over, which inevitably introduces freshness issues.
 
 
 # Documentation
@@ -50,14 +66,12 @@ the code into their application environment (as opposed to running a standalone 
 - Running it on GCP ... coming soon
 - Running it AWS ... coming soon
 
-## Connecting
-- Adding a new LLM provider
-- Adding a new Vector store connector
-
 ## NLWeb
 - Life of a Chat Query
 - Modifying behaviour by changing prompts
 - Modifying control flow
+- Modifying the user interface
+- REST interface
 
 
 
