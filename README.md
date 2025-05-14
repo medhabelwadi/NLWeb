@@ -42,7 +42,7 @@ pip install -r requirements.txt
 ```
 5. Copy the `.env.template` file into a new file named `.env` - this is where your API keys for your LLM and vector database of choice will go.
 
-5. Add your LLM service API keys to the .env file.  
+6. Add your LLM service API keys to the .env file.  
 
    If you want to use the Azure OpenAI service, follow the instructions in the [Azure Setup Guide](/docs/Azure.md).
 
@@ -50,26 +50,26 @@ pip install -r requirements.txt
    > - Preferred Provider:  By default, this is `azure_openai` - replace this with your favorite provider listed within the file.
    > - Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini.
 
-6. Add your vector database keys to the .env file.
+7. Add your vector database keys to the .env file.
 
    If you want to use Snowflake services, follow the instructions at [docs/Snowflake.md](docs/Snowflake.md).
 
    If you would like to test with a local vector database, see below to [deploy](#deploying-a-local-database) and add [data](#loading-data-into-your-local-database) below.
 
-6. Run a quick connectivity check:
+8. Run a quick connectivity check:
 ```
 python azure-connectivity.py     # If you'd like to use Azure as the LLM/retrieval provider.
 python snowflake-connectivity.py # If you'd like to use Snowflake as the LLM/retrieval provider.
 ```
 
-7. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.
+9. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.
 
-8. Run the application locally:
+10. Run the application locally:
 ```
 python app-file.py
 ```
 
-9. Navigate to the local site and start your chat:
+11. Navigate to the local site and start your chat:
 - You can also experiment at http://localhost:8000/ or http://localhost:8000/static/nlwebsearch.html 
 - Try different modes / sites at http://localhost:8000/static/str_chat.html
 
