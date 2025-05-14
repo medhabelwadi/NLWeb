@@ -1,6 +1,6 @@
 # What is NLWeb
 
-NLWeb aims to make it very simple to provide conversational interfaces to
+NLWeb aims to make it simple to provide conversational interfaces to
 websites (or more generally, collections of content) which can be abstracted
 as 'lists of items'. Items maybe recipes, events, products, books, movies, etc.
 NLWeb leverages the fact that most such database driven websites already make their data
@@ -14,13 +14,17 @@ database. Consequently strong assurances can be made that it will not 'make up'
 items that don't exist, an essential requirement for many applications.
 
 NLWeb is deeply agnostic:
-- About the platform. We have tested it running on Windows, MacOS, Linux, GCP, Azure ...
+- About the platform. We have tested it running on Windows, MacOS, Linux, Azure ...
 - About the vector stores used --- Qdrant, Snowflake, Milvus, Azure AI Search, ...
 - About the LLM --- OAI, Deepseek, Gemini, Anthropic, InceptionLabs, ...
 - It is intended to be both lightweight and scalable, running on everything from clusters 
-  in the cloud to laptops and maybe even phones.
+  in the cloud to laptops and soon phones.
 
 # How it Works
+ At a high level, NLWeb follows the pattern used in modern search engines --- a retrieval
+ process involving relatively cheap ranking (in our case, with embeddings in vector
+ databases) followed by 'deeper' ranking (in our ase, with llms). It does not use
+ 'traditional' RAG which can sometime hallucinate. More on how it works is here.
 
 # NLWeb and MCP
 
@@ -41,12 +45,20 @@ the code into their application environment (as opposed to running a standalone 
 # Documentation
 
 ## Getting Started
-- Running it locally on your laptop
+- Hello world on your laptop
 - Running it on Azure
 - Running it on GCP ... coming soon
 - Running it AWS ... coming soon
+
+## Connecting
 - Adding a new LLM provider
 - Adding a new Vector store connector
+
+## NLWeb
+- Life of a Chat Query
+- Modifying behaviour by changing prompts
+- Modifying control flow
+
 
 
 -----------------------------------------------------------------
