@@ -1,84 +1,59 @@
-# NLWeb
+# What is NLWeb
 
-Add LLM chat functionality to your existing web pages by leveraging your site schema
+NLWeb aims to make it very simple to provide conversational interfaces to
+websites (or more generally, collections of content) which can be abstracted
+as 'lists of items'. Items maybe recipes, events, products, books, movies, etc.
+NLWeb leverages the fact that most such database driven websites already make their data
+available in a structured form, in a common vocabulary, namely that provided
+by Schema.org. We leverage this to make it easy to create conversational interfaces.
+
+Given a database of items, represented in a semi-structured form, NLWeb 
+provides a RESTful conversational natural language interface to this data.
+In its basic mode, NLWeb will return a subset of the list of items in the
+database. Consequently strong assurances can be made that it will not 'make up'
+items that don't exist, an essential requirement for many applications.
+
+NLWeb is deeply agnostic:
+- About the platform. We have tested it running on Windows, MacOS, Linux, GCP, Azure ...
+- About the vector stores used --- Qdrant, Snowflake, Milvus, Azure AI Search, ...
+- About the LLM --- OAI, Deepseek, Gemini, Anthropic, InceptionLabs, ...
+- It is intended to be both lightweight and scalable, running on everything from clusters 
+  in the cloud to laptops and maybe even phones.
+
+# How it Works
+
+# NLWeb and MCP
+
+# Repository
+This repository contains the following:
+
+- the code for the core service -- handling a natural language query. See below for documentation
+  on how this can be extended / customized
+- connectors to some of the popular LLMs and vector databases. See documentation on how to add more.
+- tools for adding data in schema.org jsonl, RSS, etc. to a vector databaes of choice
+- a web server front end for this service, which being small enough runs in the web server
+- a simple UI for enabling users to issue queries via this web server
+
+We expect most production deployments to use their own UI. They are also likely to integrate
+the code into their application environment (as opposed to running a standalone NLWeb server).
+
+
+# Documentation
+
+## Getting Started
+- Running it locally on your laptop
+- Running it on Azure
+- Running it on GCP ... coming soon
+- Running it AWS ... coming soon
+- Adding a new LLM provider
+- Adding a new Vector store connector
+
 
 -----------------------------------------------------------------
 
-## Getting Started
+## License 
 
-Use these instructions to run an NLWeb server - below we have instructions for:
-- [Running an NLWeb service locally](#local-app-setup)
-- [Deploying a Local Database](#deploying-a-local-database)
-- [Loading Data into your Local Database](#loading-data-into-your-local-database)
-
-
-## Prerequisites
-
-These instructions assume that you have Python 3.10+ installed locally.
-
-
-## Local App Setup
-
-1. Clone or download this repository.
-```
-git clone https://github.com/microsoft/NLWeb
-cd NLWeb
-```
-
-2. Create a virtual environment. 
-```
-python -m venv myenv
-```
-
-3. Activate the virtual environment.   
-```
-source myenv/bin/activate    # Or on Windows: myenv\Scripts\activate
-```
-
-4. Install the dependencies.
-```
-cd code
-pip install -r requirements.txt
-```
-5. Copy the `.env.template` file into a new file named `.env` - this is where your API keys for your LLM and vector database of choice will go.
-
-6. Add your LLM service API keys to the .env file.  
-
-   If you want to use the Azure OpenAI service, follow the instructions in the [Azure Setup Guide](/docs/Azure.md).
-
-> Note: By default, we assume you are using an Azure OAI endpoint and the 4.1, 4.1-mini, and text-embedding-3-small models.  If you are using a different setup, this needs to be changed in the [config_llm.yaml](code\config\config_llm.yaml) file. Make sure to set the following:
-   > - Preferred Provider:  By default, this is `azure_openai` - replace this with your favorite provider listed within the file.
-   > - Check your models:  For example, the default models for Azure OpenAI are 4.1 and 4.1-mini, but you may want to change these to 4o and 4o-mini.
-
-7. Add your vector database keys to the .env file.
-
-   If you want to use Snowflake services, follow the instructions at [docs/Snowflake.md](docs/Snowflake.md).
-
-   If you would like to test with a local vector database, see below to [deploy](#deploying-a-local-database) and add [data](#loading-data-into-your-local-database) below.
-
-8. Run a quick connectivity check:
-```
-python azure-connectivity.py     # If you'd like to use Azure as the LLM/retrieval provider.
-python snowflake-connectivity.py # If you'd like to use Snowflake as the LLM/retrieval provider.
-```
-
-9. If you are participating in the private preview, modify your local copy of the [config_nlweb.yaml](code\config\config_nlweb.yaml) to scope the `sites` to search over your website only.
-
-10. Run the application locally:
-```
-python app-file.py
-```
-
-11. Navigate to the local site and start your chat:
-- You can also experiment at http://localhost:8000/ or http://localhost:8000/static/nlwebsearch.html 
-- Try different modes / sites at http://localhost:8000/static/str_chat.html
-
-   > Note: Your site scope was set above in the [config_nlweb.yaml](code\config\config_nlweb.yaml) file
-
-## Deploying a Local Database
-
-
-## Loading Data into your Local Database
+NLWeb uses the [MIT License](LICENSE).
 
 
 ## Deployment (CI/CD)
@@ -92,10 +67,6 @@ For questions about this GitHub project, please reach out to [NLWeb Support](mai
 ## Contributing
 
 Please see [Contribution Guidance](CONTRIBUTING.md) for more information.
-
-## License 
-
-NLWeb uses the [MIT License](LICENSE).
 
 ## Trademarks
 
