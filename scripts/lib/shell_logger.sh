@@ -17,26 +17,36 @@ function _debug(){
     local message="$1"
     
     if [ "$DEBUG" = true ]; then
-        echo -e "${YELLOW}$message${NC}"
+        echo -e "  ${YELLOW}> $message${NC}"
+    fi
+}
+
+function _debug_mask(){
+    local label="$1"
+    local message="$2"
+
+    message="$(echo "$message" | sed -E 's/^.*/****&/; s/^(.*)(.{4})$/****\2/')"
+    if [ "$DEBUG" = true ]; then
+        _debug "$label $message"
     fi
 }
 
 function _success(){
     local message="$1"
     
-    echo -e "${GREEN}$message\n${NC}"
+    echo -e "  ${GREEN}> $message\n${NC}"
 }
 
 function _info(){
     local message="$1"
     
-    echo -e "${CYAN}$message\n${NC}"
+    echo -e "  ${CYAN}> $message\n${NC}"
 }
 
 function _warn(){
     local message="$1"
     
-    echo -e "${RED}$message\n${NC}"
+    echo -e "  ${RED}> $message\n${NC}"
 }
 
 # error is just an alias for warn, but introduced to improve readability
