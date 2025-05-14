@@ -266,6 +266,14 @@ class VectorDBClient:
         Returns:
             List of search results
         """
+
+        if (site == "all"):
+            sites = CONFIG.nlweb.sites
+            if (len(sites) == 0 or sites == "all"):
+                return await self.search_all_sites(query, num_results, **kwargs)
+            else:
+                site = sites
+
         # If endpoint is specified, create a new client for that endpoint
         if endpoint_name and endpoint_name != self.endpoint_name:
             temp_client = VectorDBClient(endpoint_name=endpoint_name)
@@ -277,7 +285,7 @@ class VectorDBClient:
             site = [s.strip() for s in site.split(',')]
         elif isinstance(site, str):
             site = site.replace(" ", "_")
-        
+
         async with self._retrieval_lock:
             logger.info(f"Searching for '{query[:50]}...' in site: {site}, num_results: {num_results}")
             start_time = time.time()

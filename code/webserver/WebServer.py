@@ -21,6 +21,7 @@ from webserver.StreamingWrapper import HandleRequest, SendChunkWrapper
 from core.generate_answer import GenerateAnswer
 from webserver.static_file_handler import send_static_file
 from config.config import CONFIG
+from core.baseHandler import NLWebHandler
 
 async def handle_client(reader, writer, fulfill_request):
     """Handle a client connection by parsing the HTTP request and passing it to fulfill_request."""
