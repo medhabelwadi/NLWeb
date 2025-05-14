@@ -4,11 +4,6 @@ Add LLM chat functionality to your existing web pages by leveraging your site sc
 
 -----------------------------------------------------------------
 
-## License 
-
-NLWeb uses the [MIT License](LICENSE).
-
-
 ## Getting Started
 
 Use these instructions to run an NLWeb server - below we have instructions for:
@@ -220,6 +215,10 @@ For questions about this GitHub project, please reach out to [NLWeb Support](mai
 ## Contributing
 
 Please see [Contribution Guidance](CONTRIBUTING.md) for more information.
+
+## License 
+
+NLWeb uses the [MIT License](LICENSE).
 
 ## Trademarks
 
