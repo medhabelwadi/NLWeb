@@ -9,7 +9,7 @@ Use these instructions to configure NLWeb to run in Azure - below we have instru
 - [Deploying NLWeb to Azure via Azure CLI](#deploying-nlweb-via-the-azure-cli)
 - [Azure OpenAI endpoint creation and obtaining your API key](#azure-openai-endpoint-creation)
 - [Increasing your Azure OpenAI quota and rates](#increasing-your-azure-openai-quota-and-rates)
-- [Troubleshooting](#azure-webapp-monitoring-and-troubleshooting)
+- [Azure WebApp Monitoring and Troubleshooting](#azure-webapp-monitoring-and-troubleshooting)
 
 ## Prerequisites
 
