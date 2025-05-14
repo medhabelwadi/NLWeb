@@ -42,19 +42,20 @@ by changing these prompts.
 
 Each <tag>Prompt</tag> is identified by a 'ref' attribute, which is used
 by the code calling the LLM to construct the tag. The <tag>promptString</tag>
-follows a templated structure. Each string contains placeholders
+follows a templated structure. Each string contains placeholders / variables
 (like {request.query}, {site.itemType}, etc.) that get dynamically populated
 during execution. The prompts typically begin by establishing context about
 the user's query and the site being searched, followed by specific instructions
-for analyzing or transforming the query or ranking the a candidate item
+for analyzing or transforming the query or ranking the candidate item
 in the context of the query. The LLM calls always used structured output
 and the desired structure of the output is in the <tag>returnStruc</tag>
+The list of allowed placeholders is given at the end of this document.
 
 The above prompt is very generic and meant to be used for all types of
 items. However, most sites deal with a very limited number of types of items
 and more specific (and hence better performing) prompts can be designed
 for these. For example, if we know that the user is looking for a recipe,
-we can the following more specific prompt.
+we can use the following more specific prompt.
 
   <Recipe>
     <Prompt ref="DetectMemoryRequestPrompt">
@@ -122,7 +123,7 @@ asks the LLM to factor this in. E.g.,
       </returnStruc>
    </Prompt>
 
-Similarly, descriptions can also be changed. Eg.g,
+Similarly, descriptions can also be changed. Eg.
 
  <Recipe>
    <Prompt ref="RankingPrompt">
@@ -141,3 +142,24 @@ Similarly, descriptions can also be changed. Eg.g,
       </returnStruc>
    </Prompt>
  </Recipe>
+
+
+
+# Variables
+
+ - request.site: the site associated with the request
+ 
+ - site.itemType: the item types (Recipe, Movie, etc.) typically associated with this site
+ - request.itemType: type of item requested by user, if explicit, in the query
+
+ - request.rawQuery: the query as typed in by the user, before any kind of decontextualization
+ - request.previousQueries: previous queries in this session
+ - request.query: the decontextualized query
+ 
+ - request.contextUrl: If there is an explicit url associated with the query as the context
+ - request.contextDescription:
+
+ - request.answers: The list of top ranked answers for this request. For post steps, if any
+
+
+    
