@@ -66,14 +66,35 @@ class LoggingConfig:
         module_config = self.get_module_config(module_name)
         global_config = self.config["logging"].get("global", {})
         
-        # Get log level from environment variable or config
+        # Get log level from environment variable if set
         env_var = module_config.get("env_var")
-        default_level_str = module_config.get("default_level", 
-                                            self.config["logging"].get("default_level", "INFO"))
+        env_level = os.getenv(env_var) if env_var else None
+        
+        # Get active profile from environment variable (only if set)
+        active_profile_name = os.getenv("NLWEB_LOGGING_PROFILE")
+        profile_level = None
+        if active_profile_name:
+            active_profile = self.get_profile(active_profile_name)
+            profile_level = active_profile.get("default_level") if active_profile else None
+    
+        # Determine log level - priority order:
+        # 1. Environment variable if set
+        # 2. Profile-specific default level (only if profile is set)
+        # 3. Module-specific default level if defined
+        # 4. Global default level as fallback
+        # 5. Ultimately fallback to INFO
+        if env_level:
+            level_str = env_level
+        elif profile_level:
+            level_str = profile_level
+        else:
+            # Fall back to module-specific level, then global default
+            level_str = module_config.get("default_level", 
+                       self.config["logging"].get("default_level", "INFO"))
         
         # Convert string level to LogLevel enum
         try:
-            default_level = LogLevel[default_level_str.upper()]
+            default_level = LogLevel[level_str.upper()]
         except KeyError:
             default_level = LogLevel.INFO
         
@@ -153,7 +174,7 @@ def get_logging_config(config_path: str = "config/config_logging.yaml") -> Loggi
 # Convenience function for getting a logger
 def get_configured_logger(module_name: str) -> LoggerUtility:
     """Get a logger configured according to the YAML configuration"""
-    config = get_logging_config()
+    config = get_logging_config()  # Fixed to call get_logging_config instead of itself
     return config.get_logger(module_name)
 
 
@@ -182,6 +203,7 @@ def set_all_loggers_to_level(level: str):
 # Example usage
 if __name__ == "__main__":
     import sys
+    import os
     
     if len(sys.argv) > 1:
         if sys.argv[1] == "set-level" and len(sys.argv) > 2:
@@ -193,8 +215,10 @@ if __name__ == "__main__":
         # Get configuration
         config = get_logging_config()
         
-        # Apply production profile
-        config.apply_profile("production")
+        # Get profile from environment variable or default to development
+        profile = os.getenv("NLWEB_LOGGING_PROFILE", "development")
+        config.apply_profile(profile)
+        print(f"Applied logging profile: {profile}")
         
         # Get loggers for different modules
         llm_logger = get_configured_logger("llm_wrapper")

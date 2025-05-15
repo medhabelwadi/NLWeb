@@ -121,7 +121,7 @@ class LoggerUtility:
                 file_handler.setFormatter(formatter)
                 file_handler.setLevel(level.value)
                 self.logger.addHandler(file_handler)
-                print(f"Logger {name} writing to: {resolved_log_file}")
+                print(f"Logger {name} writing to: {resolved_log_file} at level {level.name}")
             except Exception as e:
                 print(f"Error setting up log file {resolved_log_file}: {e}")
     
