@@ -64,11 +64,11 @@ async def check_inception_api():
     print("\nChecking Inception API connectivity...")
     
     # Check if Inception is configured
-    if "inception" not in CONFIG.providers:
+    if "inception" not in CONFIG.llm_providers:
         print("❌ Inception provider not configured")
         return False
     
-    inception_config = CONFIG.providers["inception"]
+    inception_config = CONFIG.llm_providers["inception"]
     api_key = inception_config.api_key
     
     if not api_key:
