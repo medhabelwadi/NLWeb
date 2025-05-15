@@ -60,7 +60,7 @@ def trim_schema_json_list(schema_json, site):
         trimmed_item = trim_schema_json(item, site)
         if trimmed_item is not None:
             trimmed_items.append(trimmed_item)
-    return trimmed_items
+    return trimmed_items or None
 
 def trim_schema_json(schema_json, site):
     if isinstance(schema_json, list):
