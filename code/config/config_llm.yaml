@@ -3,8 +3,6 @@ preferred_provider: azure_openai
 providers:
   inception:
     api_key_env: INCEPTION_API_KEY
-    embedding_provider: openai
-    embedding_model_env: OPENAI_EMBEDDING_MODEL
     models:
       high: mercury-small
       low: mercury-small
