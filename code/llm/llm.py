@@ -121,4 +121,5 @@ async def ask_llm(
                 "error_message": str(e)
             }
         )
+
         raise
