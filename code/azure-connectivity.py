@@ -183,7 +183,7 @@ async def main():
     # Create and run all checks simultaneously
     tasks = [
         check_search_api(),
-        #check_openai_api(),
+        check_openai_api(),
         check_azure_openai_api(),
         check_embedding_api()
     ]
