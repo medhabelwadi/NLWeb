@@ -10,7 +10,6 @@ function configure_retrieval_endpoint(){
         declare endpoint_selection
         _select_list endpoint_selection "Select Retrieval endpoint:" "${RETRIEVAL_ENDPOINTS[@]}"
         export SELECTED_RETRIEVAL_ENDPOINT="$endpoint_selection"
-        echo "foo $SELECTED_RETRIEVAL_ENDPOINT"
         update_preferred_endpoint "$SELECTED_RETRIEVAL_ENDPOINT"
     else
       # Use the only available provider or the preferred one

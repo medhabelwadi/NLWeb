@@ -11,13 +11,7 @@
 *.sln.docstates
 myenv
 .env
-.deployment
 
-# Terraform
-.terraform
-*.tfstate*
-*.tfvars
-*.tfplan
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
