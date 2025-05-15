@@ -42,9 +42,19 @@ class LoggingConfig:
     def _ensure_log_directory(self):
         """Create log directory if it doesn't exist"""
         log_dir = self.config["logging"].get("log_directory", "logs")
+        
+        # Check for NLWEB_OUTPUT_DIR environment variable
+        output_dir = os.getenv('NLWEB_OUTPUT_DIR')
+        if output_dir:
+            # Create logs directory under the output directory
+            log_dir = os.path.join(output_dir, os.path.basename(log_dir))
+            
         if log_dir and not os.path.exists(log_dir):
-            os.makedirs(log_dir)
+            os.makedirs(log_dir, exist_ok=True)
             print(f"Created log directory: {log_dir}")
+            
+        # Store the resolved directory
+        self.log_directory = log_dir
     
     def get_module_config(self, module_name: str) -> Dict[str, Any]:
         """Get configuration for a specific module"""
@@ -67,12 +77,11 @@ class LoggingConfig:
         except KeyError:
             default_level = LogLevel.INFO
         
-        # Get log file path - ALWAYS use the log directory
+        # Get log file path - Use self.log_directory which respects NLWEB_OUTPUT_DIR
         log_file = None
         if global_config.get("file_output", True):
             log_filename = module_config.get("log_file", f"{module_name}.log")
-            log_dir = self.config["logging"].get("log_directory", "logs")
-            log_file = os.path.join(log_dir, log_filename)
+            log_file = os.path.join(self.log_directory, log_filename)
         
         # Get format string
         format_string = global_config.get("file_format" if log_file else "format")
