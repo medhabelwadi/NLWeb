@@ -222,21 +222,20 @@ class NLWebHandler:
             self.retrieval_done_event.set()
         
         logger.info("Preparation phase completed")
-        log(f"prepare tasks done")
 
     def decontextualizeQuery(self):
         logger.info("Determining decontextualization strategy")
-        if (self.context_url == '' and len(self.prev_queries) < 1):
+        if (len(self.prev_queries) < 1):
             logger.debug("No context or previous queries - using NoOpDecontextualizer")
             self.decontextualized_query = self.query
             return decontextualize.NoOpDecontextualizer(self)
         elif (self.decontextualized_query != ''):
             logger.debug("Decontextualized query already provided - using NoOpDecontextualizer")
             return decontextualize.NoOpDecontextualizer(self)
-        elif (self.context_url == '' and len(self.prev_queries) > 0):
+        elif (len(self.prev_queries) > 0):
             logger.debug(f"Using PrevQueryDecontextualizer with {len(self.prev_queries)} previous queries")
             return decontextualize.PrevQueryDecontextualizer(self)
-        elif (self.context_url != '' and len(self.prev_queries) == 0):
+        elif (len(self.context_url) > 4 and len(self.prev_queries) == 0):
             logger.debug(f"Using ContextUrlDecontextualizer with context URL: {self.context_url}")
             return decontextualize.ContextUrlDecontextualizer(self)
         else:
