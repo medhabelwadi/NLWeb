@@ -1,28 +1,43 @@
 import httpx
 import json
-from config.config import CONFIG
-from typing import Dict, List, Tuple
+from config.config import CONFIG, RetrievalProviderConfig
+from typing import Any, Dict, List, Optional, Tuple, Union
 from utils import snowflake
 
-async def search_all_sites(query: str, top_n: int=10):
-    return await search(query, top_n=top_n)
+class SnowflakeCortexSearchClient:
+    """
+    Adapts the Snowflake Cortex Search API to the VectorDBClientInterface.
 
-async def search_db(query: str, site: str, num_results: int=50):
-    return await search(query, site=site, top_n=num_results)
+    See: https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-search/query-cortex-search-service#rest-api
+    """
+    _cfg = None
 
-async def retrieve_item_with_url(url: str, top_n=1):
-    # As of May 2025 cortex search requires a non-empty query for ranking.
-    return await search(query="a", url=url, top_n=top_n)
+    def __init__(self, endpoint_name: Optional[str] = None):
+        self._cfg = CONFIG.retrieval_endpoints[endpoint_name]
+
+    async def deleted_documents_by_site(self, site: str, **kwargs) -> int:
+        raise NotImplementedError("Not implemented yet, requires translation to a DELETE statement in Snowflake")
+
+    async def upload_documents(self, documents: List[Dict[str, Any]], **kwargs) -> int:
+        raise NotImplementedError("Incremental updates not implemented here yet, see snowflake.sql and docs/Snowflake.md for how to bulk upload datasets")
+
+    async def search(self, query: str, site: Union[str, List[str]], num_results: int=50, **kwargs) -> List[List[str]]:
+        return await search(query, site=site, top_n=num_results, cfg=self._cfg)
+
+    async def search_by_url(self, url: str, **kwargs) -> Optional[List[str]]:
+        return await search(query="a", url=url, top_n=1, cfg=self._cfg)
+
+    async def search_all_sites(self, query: str, num_results: int = 50, **kwargs) -> List[List[str]]:
+        return await search(query, top_n=num_results, cfg=self._cfg)
 
 
-def get_cortex_search_service() -> Tuple[str,str,str]:
+def get_cortex_search_service(cfg: RetrievalProviderConfig) -> Tuple[str,str,str]:
     """
     Retrieve the Cortex Search Service (database, schema, service) to use from the configuration, or raise an error.
     """
-    config = CONFIG
-    if not config:
-        raise snowflake.ConfigurationError("Unable to determine Snowflake configuration, is SNOWFLAKE_CONFIG set?")
-    index_name = config.retrieval_endpoints["snowflake_cortex_search_1"].index_name
+    if not cfg:
+        raise snowflake.ConfigurationError("Unable to determine Snowflake configuration")
+    index_name = cfg.index_name
     if not index_name:
         raise snowflake.ConfigurationError("Unable to determine Snowflake Cortex Search Service, is SNOWFLAKE_CORTEX_SEARCH_SERVICE set?")
     parts = index_name.split(".")
@@ -30,7 +45,7 @@ def get_cortex_search_service() -> Tuple[str,str,str]:
         raise snowflake.ConfigurationError(f"Invalid SNOWFLAKE_CORTEX_SEARCH_SERVICE, expected format:<database>.<schema>.<service>, got {index_name}")
     return (parts[0], parts[1], parts[2])
 
-async def search(query: str, site: str|None=None, url: str|None=None, top_n: int=10) -> dict:
+async def search(query: str, site: str|List[str]|None=None, url: str|None=None, top_n: int=10, cfg: RetrievalProviderConfig|None=None) -> dict:
     """
     Send a search request to a Cortex Search Service which has the columns
     URL and SCHEMA.
@@ -53,10 +68,10 @@ async def search(query: str, site: str|None=None, url: str|None=None, top_n: int
             ]
         }
 
-    (database, schema, service) = get_cortex_search_service()
+    (database, schema, service) = get_cortex_search_service(cfg)
     async with httpx.AsyncClient() as client:
         response =  await client.post(
-            snowflake.get_account_url() + f"/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service}:query",
+            snowflake.get_account_url(cfg) + f"/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service}:query",
             json={
                 "query": query,
                 "limit": max(1, min(top_n, 1000)),
@@ -64,7 +79,7 @@ async def search(query: str, site: str|None=None, url: str|None=None, top_n: int
                 "filter": filter,
             },
             headers={
-                    "Authorization": f"Bearer {snowflake.get_pat()}",
+                    "Authorization": f"Bearer {snowflake.get_pat(cfg)}",
                     "Content-Type": "application/json",
                     "Accept": "application/json",
             },
