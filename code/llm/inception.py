@@ -2,7 +2,7 @@
 # Licensed under the MIT License
 
 """
-InceptionLabs API wrapper for LLM functionality.
+Inception API wrapper for LLM functionality.
 
 WARNING: This code is under development and may undergo changes in future releases.
 Backwards compatibility is not guaranteed at this time.
@@ -27,7 +27,7 @@ class ConfigurationError(RuntimeError):
 
 
 class InceptionProvider(LLMProvider):
-    """Implementation of LLMProvider for InceptionLabs API.
+    """Implementation of LLMProvider for Inception API.
 
         Perform a single-shot (non-streaming) chat completion asynchronously.
     Returns the full assistant response as a string, or as structured JSON if schema is provided.
@@ -46,7 +46,7 @@ class InceptionProvider(LLMProvider):
     @classmethod
     def get_client(cls):
         """
-        InceptionLabs uses direct HTTP calls, so there's no persistent client.
+        Inception uses direct HTTP calls, so there's no persistent client.
         This method is implemented to satisfy the interface but returns None.
         """
         return None
