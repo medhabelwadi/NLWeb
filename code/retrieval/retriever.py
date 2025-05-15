@@ -19,7 +19,8 @@ from utils.logger import LogLevel
 # Import client classes
 from retrieval.azure_search_client import AzureSearchClient
 from retrieval.milvus_client import MilvusVectorClient
-from retrieval.qdrant_client import QdrantVectorClient
+from retrieval.qdrant import QdrantVectorClient
+from retrieval.snowflake_client import SnowflakeCortexSearchClient
 
 logger = get_configured_logger("retriever")
 
@@ -171,6 +172,8 @@ class VectorDBClient:
                 client = MilvusVectorClient(self.endpoint_name)
             elif self.db_type == "qdrant":
                 client = QdrantVectorClient(self.endpoint_name)
+            elif self.db_type == "snowflake_cortex_search":
+                client = SnowflakeCortexSearchClient(self.endpoint_name)
             else:
                 error_msg = f"Unsupported database type: {self.db_type}"
                 logger.error(error_msg)
@@ -263,6 +266,14 @@ class VectorDBClient:
         Returns:
             List of search results
         """
+
+        if (site == "all"):
+            sites = CONFIG.nlweb.sites
+            if (len(sites) == 0 or sites == "all"):
+                return await self.search_all_sites(query, num_results, **kwargs)
+            else:
+                site = sites
+
         # If endpoint is specified, create a new client for that endpoint
         if endpoint_name and endpoint_name != self.endpoint_name:
             temp_client = VectorDBClient(endpoint_name=endpoint_name)
@@ -274,7 +285,7 @@ class VectorDBClient:
             site = [s.strip() for s in site.split(',')]
         elif isinstance(site, str):
             site = site.replace(" ", "_")
-        
+
         async with self._retrieval_lock:
             logger.info(f"Searching for '{query[:50]}...' in site: {site}, num_results: {num_results}")
             start_time = time.time()
