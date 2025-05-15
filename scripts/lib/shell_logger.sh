@@ -34,19 +34,19 @@ function _debug_mask(){
 function _success(){
     local message="$1"
     
-    echo -e "  ${GREEN}> $message\n${NC}"
+    echo -e "  ${GREEN}> $message${NC}"
 }
 
 function _info(){
     local message="$1"
     
-    echo -e "  ${CYAN}> $message\n${NC}"
+    echo -e "  ${CYAN}> $message${NC}"
 }
 
 function _warn(){
     local message="$1"
     
-    echo -e "  ${RED}> $message\n${NC}"
+    echo -e "${RED}> $message${NC}"
 }
 
 # error is just an alias for warn, but introduced to improve readability
@@ -63,3 +63,6 @@ function _info_mask(){
     _info "$label $message"
 }
 
+function _prompt() {
+  printf "\n\e[35m>%s\n\e[0m" "$@"
+}
