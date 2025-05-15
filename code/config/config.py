@@ -346,12 +346,14 @@ class AppConfig:
                 data["data_folders"].get("json_with_embeddings"), 
                 json_with_embeddings_folder
             )
-        
-        # Convert relative paths to absolute paths based on config file location
-        if not os.path.isabs(json_data_folder):
-            json_data_folder = os.path.abspath(os.path.join(config_dir, json_data_folder))
-        if not os.path.isabs(json_with_embeddings_folder):
-            json_with_embeddings_folder = os.path.abspath(os.path.join(config_dir, json_with_embeddings_folder))
+    
+        # Convert relative paths to use NLWEB_OUTPUT_DIR if available
+        base_output_dir = self.base_output_directory
+        if base_output_dir:
+            if not os.path.isabs(json_data_folder):
+                json_data_folder = os.path.join(base_output_dir, "data", "json")
+            if not os.path.isabs(json_with_embeddings_folder):
+                json_with_embeddings_folder = os.path.join(base_output_dir, "data", "json_with_embeddings")
         
         # Ensure directories exist
         os.makedirs(json_data_folder, exist_ok=True)
