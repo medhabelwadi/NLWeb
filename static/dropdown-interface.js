@@ -138,8 +138,8 @@ export class DropdownInterface {
     });
     
     // Set initial value to preferred endpoint from config
-    dbSelect.value = "azure_ai_search_1";
-    this.chatInterface.database = "azure_ai_search_1";
+    dbSelect.value = "azure_ai_search";
+    this.chatInterface.database = "azure_ai_search";
     
     // Make dbSelect accessible to chatInterface
     this.chatInterface.dbSelect = dbSelect;
@@ -253,12 +253,8 @@ export class DropdownInterface {
    */
   getDatabases() {
     return [
-      { id: 'azure_ai_search_1', name: 'NLWeb_Crawl' },
-      { id: 'azure_ai_search_2', name: 'Bing_Crawl' },
-
-      { id: 'azure_ai_search_test', name: 'NLWeb_Upload_Test' },
+      { id: 'azure_ai_search', name: 'NLWeb_Crawl' },
       { id: 'milvus_1', name: 'Milvus' },
-
       { id: 'qdrant_local', name: 'Qdrant Local' },
       { id: 'qdrant_url', name: 'Qdrant URL' },
       { id: 'snowflake_cortex_search_1', name: 'Snowflake_Cortex_Search' }
