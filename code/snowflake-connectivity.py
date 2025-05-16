@@ -7,10 +7,11 @@ Run this script to validate environment variables and API access.
 try:
     import asyncio
     import time
-    import json
-    from llm import snowflake
-    from retrieval import snowflake_retrieve
+    from llm import llm
+    from embedding import embedding
+    from retrieval import retriever
     import sys
+    import traceback
 except ImportError as e:
     print(f"Error importing required libraries: {e}")
     print("Please run: pip install -r requirements.txt")
@@ -26,18 +27,23 @@ async def check_and_print(f) -> bool:
         return result
     except Exception as e:
         print(f"❌ {f.__name__}: {e}")
+        print(traceback.format_exc())
         return False
 
-async def cortex_embed() -> bool:
-    embedding = await snowflake.cortex_embed("Testing connectivity")
-    return len(embedding) > 0
+async def check_embedding() -> bool:
+    response = await embedding.get_embedding("Testing connectivity", provider="snowflake")
+    return len(response) > 0
 
-async def cortex_complete() -> bool:
-    resp = await snowflake.cortex_complete("The answer to the ultimate question of life, the universe, and everything is", {"answer": "string"})
+async def check_complete() -> bool:
+    resp = await llm.ask_llm(
+        prompt="The answer to the ultimate question of life, the universe, and everything is",
+        schema={"answer": "string"},
+        provider="snowflake")
     return resp.get("answer", None) is not None
 
-async def cortex_search() -> bool:
-    resp = await snowflake_retrieve.search("funny movies", top_n=1)
+async def check_search() -> bool:
+    client = retriever.get_vector_db_client("snowflake_cortex_search_1")
+    resp = await client.search_all_sites("funny movies", top_n=1)
     return len(resp) > 0 and len(resp[0]) == 4
 
 async def main():
@@ -45,9 +51,9 @@ async def main():
 
     start_time = time.time()
     tasks = [
-        check_and_print(cortex_embed),
-        check_and_print(cortex_complete),
-        check_and_print(cortex_search),
+        check_and_print(check_embedding),
+        check_and_print(check_complete),
+        check_and_print(check_search),
     ]
     print("Running Snowflake connectivity checks...")
     results = await asyncio.gather(*tasks, return_exceptions=True)

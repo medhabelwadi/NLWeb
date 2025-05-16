@@ -8,20 +8,6 @@ endpoints:
     db_type: azure_ai_search
     name: NLWeb_Crawl
 
-  azure_ai_search_2:
-    api_key_env: AZURE_VECTOR_SEARCH_API_KEY_2
-    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT_2
-    index_name: embeddings1536
-    db_type: azure_ai_search
-    name: Bing_Crawl
-      
-  azure_ai_search_test:
-    api_key_env: AZURE_VECTOR_SEARCH_API_KEY_TEST
-    api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT_TEST
-    index_name: embeddings1536
-    db_type: azure_ai_search
-    name: NLWeb_Upload_Test
-
   milvus_1:
     database_path: ../milvus/milvus_prod.db
     index_name: prod_collection
@@ -48,6 +34,7 @@ endpoints:
     db_type: qdrant
 
   snowflake_cortex_search_1:
+    api_key_env: SNOWFLAKE_PAT
     api_endpoint_env: SNOWFLAKE_ACCOUNT_URL
     index_name: SNOWFLAKE_CORTEX_SEARCH_SERVICE
     db_type: snowflake_cortex_search
