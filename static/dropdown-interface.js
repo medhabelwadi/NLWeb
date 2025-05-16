@@ -1,6 +1,8 @@
 /**
  * DropdownInterface Class
  * Handles the dropdown UI elements for site selection and options
+ * for the debug interface.
+ * 
  */
 
 import { escapeHtml } from './utils.js';
@@ -225,13 +227,13 @@ export class DropdownInterface {
    * Gets the available sites for the selector
    * 
    * @returns {Array} - Array of site names
+   * If you would like a site to show up in the dropdown, please add it here.
+   * For now, we will leave it with just the launch partners who
+   * are making their data available
    */
   getSites() {
     return [
-      'scifi_movies','imdb', 'nytimes', 'verge','delish','alltrails', 'allbirds', 'seriouseats', 'oreilly',
-      'npr podcasts', 'backcountry', 'bc_product', 'neurips', 'zillow', 'eventbrite',
-      'tripadvisor', 'woksoflife', 'cheftariq', 'hebbarskitchen',
-      'latam_recipes', 'spruce', 'med podcast', 'allbirdsdd', 'all'
+      'scifi_movies', 'verge','oreilly', 'eventbrite','all'
     ];
   }
 
