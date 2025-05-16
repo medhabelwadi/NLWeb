@@ -17,8 +17,8 @@ providers:
   anthropic:
     api_key_env: ANTHROPIC_API_KEY
     models:
-      high: claude-2
-      low: claude-2
+      high: claude-3-7-sonnet-latest
+      low: claude-3-5-haiku-latest
 
   gemini:
     api_key_env: GCP_PROJECT

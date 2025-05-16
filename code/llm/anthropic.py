@@ -40,12 +40,8 @@ class AnthropicProvider(LLMProvider):
         """Retrieve the Anthropic API key from the environment or raise an error."""
         # Get the API key from the preferred provider config
         provider_config = CONFIG.llm_providers["anthropic"]
-        api_key_env_var = provider_config.api_key_env
-        
-        key = os.getenv(api_key_env_var)
-        if not key:
-            raise ConfigurationError(f"{api_key_env_var} is not set")
-        return key
+        api_key = provider_config.api_key
+        return api_key
 
     @classmethod
     def get_client(cls) -> AsyncAnthropic:
