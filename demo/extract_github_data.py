@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 #name
 #url
 
+default_filename = "ghrepoinfo.json"
+
 
 def get_all_pages(url, headers, params=None):
     results = []
@@ -68,6 +70,7 @@ def main():
         print("repo:---------------------------------------------------------------------------")
         print(repo)
         # Confirm that it always has a name and description?  
+        # TODO: pull in some specific fields rather than everything so we don't hit embedding token limits
         
         issues_url = f"https://api.github.com/repos/{owner}/{name}/issues"
         issues = get_all_pages(issues_url, headers, {"state": "all"})
@@ -102,13 +105,26 @@ def main():
             #"pulls": pulls
         })
 
+
+        # This is just for debugging, remove later
+        with open("JenOneRepo.json", "w", encoding="utf-8") as f:
+            json.dump(repo, f, indent=4)
+
+
+        with open(default_filename, "a", encoding="utf-8") as f:
+            json.dump(repo, f)
+            f.write("\n")
+
         remove_later += 1
-        if remove_later > 5:
+        if remove_later > 2:
             break
+
+    logging.info(f"Wrote JSON-LD output to {default_filename}")  # added
+    
 
     '''
     # Convert collected data into JSON-LD format
-   #with open("ghrepoinfo.json", "w", encoding="utf-8") as f:
+   #with open(default_filename, "w", encoding="utf-8") as f:
    #    json.dump(all_data, f, indent=2)
     jsonld = {
        "@context": {
@@ -150,9 +166,9 @@ def main():
        jsonld["@graph"].append(graph_item)
     '''
 
-    logging.info("Writing JSON-LD output to ghrepoinfo.json")  # added
-    with open("ghrepoinfo.json", "w", encoding="utf-8") as f:
-       json.dump(all_data, f, indent=4)
+    #logging.info(f"Writing JSON-LD output to {default_filename}")  # added
+    #with open(default_filename, "w", encoding="utf-8") as f:
+    #   json.dump(all_data, f)
 
 if __name__ == "__main__":
     main()
