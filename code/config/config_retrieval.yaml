@@ -1,7 +1,7 @@
-preferred_endpoint: azure_ai_search
+preferred_endpoint: azure_ai_search_1
 
 endpoints:
-  azure_ai_search:
+  azure_ai_search_1:
     api_key_env: AZURE_VECTOR_SEARCH_API_KEY
     api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
     index_name: embeddings1536
