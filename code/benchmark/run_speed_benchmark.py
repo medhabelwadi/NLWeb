@@ -317,12 +317,12 @@ async def run_benchmark():
         plot_results(
             [r for r in multiturn_results if r['turn'] != 'ALL'],
             title='Multi-turn Benchmark Timing by Provider',
-            filename='../data/benchmark_results/multiturn_benchmark.png'
+            filename='./benchmark/data/results/multiturn_benchmark.png'
         )
         plot_total_conversation_time_per_provider(
             multiturn_results,
             title='Total Conversation Time by Provider',
-            filename='../data/benchmark_results/multiturn_total_conversation_time.png'
+            filename='./benchmark/data/results/multiturn_total_conversation_time.png'
         )
 
 if __name__ == "__main__":
