@@ -49,7 +49,7 @@ machines through natural agent-to-agent interaction. Join us in building this co
  MCP is NLWeb as Http is to HTML.
 
 
-# NLWeb and platforms.
+# NLWeb and platforms
 NLWeb is deeply agnostic:
 - About the platform. We have tested it running on Windows, MacOS, Linux, ...
 - About the vector stores used: Qdrant, Snowflake, Milvus, Azure AI Search, ...
