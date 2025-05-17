@@ -30,8 +30,8 @@ machines through natural agent-to-agent interaction. Join us in building this co
 
 # How it Works
  There are two distinct components to NLWeb.
- 1. A protocol, very simple to beging with, to interface with a site in natural 
-     language for asking a site's and a format, leveraging json and schema.org 
+ 1. A protocol, very simple to begin with, to interface with a site in natural 
+     language and a format, leveraging json and schema.org 
      for the returned answer. See the documentation on the REST API for more details.
 
  2. A straightforward implementation of (1) that leverages existing markup, for
@@ -51,7 +51,7 @@ machines through natural agent-to-agent interaction. Join us in building this co
 
 # NLWeb and platforms.
 NLWeb is deeply agnostic:
-- About the platform. We have tested it running on Windows, MacOS, Linux, Azure ...
+- About the platform. We have tested it running on Windows, MacOS, Linux,  ...
 - About the vector stores used --- Qdrant, Snowflake, Milvus, Azure AI Search, ...
 - About the LLM --- OAI, Deepseek, Gemini, Anthropic, InceptionLabs, ...
 - It is intended to be both lightweight and scalable, running on everything from clusters 
