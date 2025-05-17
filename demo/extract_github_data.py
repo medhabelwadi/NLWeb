@@ -5,16 +5,13 @@ import os
 import logging
 from dotenv import load_dotenv
 
-# ...existing code...
+# This script extracts data from a GitHub repository using the GitHub API.
+# It retrieves information about the repository, issues, and pull requests.
+# The extracted data is saved in JSON-LD format for NLWeb import.
 
-#This is what you need for the JSON-LD output:
-#@type
-#description
-#name
-#url
+# This is what you need for the JSON-LD output: @type, name, description, url
 
 default_filename = "ghrepoinfo.json"
-
 
 def get_all_pages(url, headers, params=None):
     results = []
@@ -35,12 +32,13 @@ def get_all_pages(url, headers, params=None):
     return results
 
 def main():
-    load_dotenv()
-
+    # Set up logging
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s")
     logging.info("Starting GitHub data extraction")
 
+    # Load environment variables from .env file
+    load_dotenv()
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
         print("Error: GITHUB_TOKEN environment variable not set")
@@ -51,124 +49,176 @@ def main():
         "Accept": "application/vnd.github.v3+json"
     }
 
+    # TODO: remove this
+    #remove_later = 0
+
+    # Create a new file if it does not exist
+    with open(default_filename, "w") as file:
+        file.write("")  # Clear the file if it exists
+
+    debug_size= {}
+    i = 0
+
     repos = get_all_pages("https://api.github.com/user/repos", headers)
     logging.info(f"Found {len(repos)} repositories")
-    all_data = []
-    remove_later = 0
+    #all_data = []
     for repo in repos:
         owner = repo["owner"]["login"]
+        name = repo["name"]
+        
+        if owner == "liamca":
+            continue
+        elif owner == "MicrosoftCopilot":
+            continue
+        elif owner == "dwcares":
+            continue
+
+        if repo["visibility"] != "public":
+            continue
+
+        logging.info(f"Processing repo {owner}/{name}")
+
+        
+        # Copying over only a subset of information due to embedding model token limits
+        repo_info = {
+            "@type": "GithubRepository",
+            "name": repo["full_name"],
+            "description": repo.get("description", f"This is a GitHub repository created by {owner}"),
+            "url": repo["html_url"],
+            "owner": repo["owner"]["login"],
+            "private": repo["private"],
+            "fork": repo["fork"],
+            "size": repo["size"],
+            "stargazers_count": repo["stargazers_count"],
+            #"watchers_count": repo["watchers_count"],
+            "language": repo["language"],
+            #"forks_count": repo["forks_count"],
+            "archived": repo["archived"],
+            "disabled": repo["disabled"],
+            #"open_issues_count": repo["open_issues_count"],
+            "license": repo["license"]["name"] if repo.get("license") else None,
+            "allow_forking": repo["allow_forking"],
+            "visibility": repo["visibility"],
+            "forks": repo["forks"],
+            "open_issues": repo["open_issues"],
+            "watchers": repo["watchers"],
+            "default_branch": repo["default_branch"],
+        }
+        # TODO: it would be cool to add collaborators, branches, tags, languages, stargazers, contributors, subscribers, downloads
+        
+        #repo["@type"] = "Repository"
+        #repo["name"] = repo["name"]
+        #repo["description"] = repo.get("description", "")   # TODO: give a better default description
+       # repo["url"] = repo["html_url"]
+        #owner = repo["owner"]["login"]
         #if owner != "jennifermarsman":
         #    continue
-        name = repo["name"]
-        logging.info(f"Processing repo {owner}/{name}")  # added
-        print("Repo info: ", repo)
+        #print("Repo info: ", repo)
         #repo_json = json.loads(repo)
-        repo["@type"] = "Repository"
-        #repo["name"] = repo["name"]
-        repo["description"] = repo.get("description", "")   # TODO: give a better default description
-        repo["url"] = repo["html_url"]
-        print("repo:---------------------------------------------------------------------------")
-        print(repo)
-        # Confirm that it always has a name and description?  
-        # TODO: pull in some specific fields rather than everything so we don't hit embedding token limits
         
+        #print("repo:---------------------------------------------------------------------------")
+        #print(repo)
+        
+        # Issues for this repo
         issues_url = f"https://api.github.com/repos/{owner}/{name}/issues"
         issues = get_all_pages(issues_url, headers, {"state": "all"})
         logging.info(f"Fetched {len(issues)} issues for {owner}/{name}")
-        if len(issues) > 0:
-            print("example issue:", issues[0]) 
+
+        # Hack for demo so we won't hit model embedding limits
+        if len(issues) > 10:
+            continue
+        logging.info(f"Fetched {len(issues)} issues for {owner}/{name}")
+
+        issues_info = []
         for issue in issues:
-            issue["@type"] = "Issue"
-            issue["name"] = issue["title"]
-            issue["description"] = issue.get("body", "")
-            issue["url"] = issue["html_url"]
+            issue_info = {
+                "@type": "GithubIssue",
+                "name": issue["title"],
+                "description": issue.get("body", f"This is a GitHub issue"),
+                "url": issue["html_url"],
+                "user": issue["user"]["login"],
+                "labels": issue["labels"],
+                "state": issue["state"],
+                "assignee": issue["assignee"]["login"] if issue.get("assignee") else None,
+                "comments": issue["comments"],
+                "created_at": issue["created_at"],
+                "updated_at": issue["updated_at"],
+                "closed_at": issue["closed_at"],
+                "closed_by": issue["closed_by"]["login"] if issue.get("closed_by") else None,
+                "reactions": issue["reactions"],
+            }
+            issues_info.append(issue_info)
+            #issue["@type"] = "Issue"
+            #issue["name"] = issue["title"]
+            #issue["description"] = issue.get("body", "")
+            #issue["url"] = issue["html_url"]
             # TODO: confirm that this is appending correctly
-            print("issue:---------------------------------------------------------------------------")
-            print(issue)
-        repo["issues"] = issues
-               
+            #print("issue:---------------------------------------------------------------------------")
+            #print(issue)
+        repo_info["issues"] = issues_info
+
+        # Pull requests for this repo  
         pulls_url = f"https://api.github.com/repos/{owner}/{name}/pulls"
         pulls = get_all_pages(pulls_url, headers, {"state": "all"})
         logging.info(f"Fetched {len(pulls)} pull requests for {owner}/{name}")  # added
-        if len(pulls) > 0:
-            print("example pull request:", pulls[0])  # added
+        pulls_info = []
         for pull in pulls:
-            pull["@type"] = "PullRequest"
-            pull["name"] = pull["title"]
-            pull["description"] = pull.get("body", "")
-            pull["url"] = pull["html_url"]
-        repo["pulls"] = pulls
+            pull_info = {
+                "@type": "GithubPullRequest",
+                "name": pull["title"],
+                "description": pull.get("body", f"This is a GitHub pull request"),
+                "url": pull["html_url"],
+                "number": pull["number"],
+                "state": pull["state"],
+                "user": pull["user"]["login"],
+                "created_at": pull["created_at"],
+                "updated_at": pull["updated_at"],
+                "closed_at": pull["closed_at"],
+                "merged_at": pull["merged_at"],
+                "assignee": pull["assignee"]["login"] if pull.get("assignee") else None,
+                "labels": pull["labels"],
+                "draft": pull["draft"],
+                "auto_merge": pull["auto_merge"],
+            }
+            pulls_info.append(pull_info)
+            #pull["@type"] = "PullRequest"
+            #pull["name"] = pull["title"]
+            #pull["description"] = pull.get("body", "")
+            #pull["url"] = pull["html_url"]
+        repo_info["pulls"] = pulls_info
 
-        all_data.append({
-            "repo": repo,
-            #"issues": issues,
-            #"pulls": pulls
-        })
+        key = repo_info["name"]
+        #debug_size.append(i, len(str(repo_info)))
+        debug_size[key] = len(str(repo_info))
+        #print("json length: ", len(str(repo_info)))
+        i += 1
+        
+        #all_data.append({
+        #    "repo": repo,
+        #    #"issues": issues,
+        #    #"pulls": pulls
+        #})
 
 
         # This is just for debugging, remove later
-        with open("JenOneRepo.json", "w", encoding="utf-8") as f:
-            json.dump(repo, f, indent=4)
-
+        #with open("JenOneRepoInfo.json", "w", encoding="utf-8") as f:
+        #    json.dump(repo_info, f, indent=4)
 
         with open(default_filename, "a", encoding="utf-8") as f:
-            json.dump(repo, f)
+            json.dump(repo_info, f)
             f.write("\n")
 
-        remove_later += 1
-        if remove_later > 2:
-            break
+        #remove_later += 1
+        #if remove_later > 50:
+        #    break
 
     logging.info(f"Wrote JSON-LD output to {default_filename}")  # added
     
+    #max_value = max(debug_size.values())
+    #max_keys = [key for key, value in debug_size.items() if value == max_value]
+    #print("Keys with maximum value:", max_keys)
+    #print("Maximum value:", max_value)
 
-    '''
-    # Convert collected data into JSON-LD format
-   #with open(default_filename, "w", encoding="utf-8") as f:
-   #    json.dump(all_data, f, indent=2)
-    jsonld = {
-       "@context": {
-           "schema": "https://schema.org/",
-           "name": "schema:name",
-           "description": "schema:description",
-           "url": "schema:url",
-           "issues": {"@id": "schema:hasPart", "@container": "@set"},
-           "pullRequests": {"@id": "schema:hasPart", "@container": "@set"}
-       },
-       "@graph": []
-    }
-    for item in all_data:
-       repo = item["repo"]
-       issues = item["issues"]
-       pulls = item["pulls"]
-       graph_item = {
-           "@type": "schema:SoftwareSourceCode",
-           "schema:name": repo["name"],
-           "schema:description": repo.get("description", ""),
-           "schema:url": repo["html_url"],
-           "issues": [
-               {
-                   "@type": "schema:DiscussionForumPosting",
-                   "schema:name": i["title"],
-                   "schema:description": i.get("body", ""),
-                   "schema:url": i["html_url"]
-               } for i in issues
-           ],
-           "pullRequests": [
-               {
-                   "@type": "schema:SoftwareSourceCode",
-                   "schema:name": p["title"],
-                   "schema:description": p.get("body", ""),
-                   "schema:url": p["html_url"]
-               } for p in pulls
-           ]
-       }
-       jsonld["@graph"].append(graph_item)
-    '''
-
-    #logging.info(f"Writing JSON-LD output to {default_filename}")  # added
-    #with open(default_filename, "w", encoding="utf-8") as f:
-    #   json.dump(all_data, f)
 
 if __name__ == "__main__":
     main()
