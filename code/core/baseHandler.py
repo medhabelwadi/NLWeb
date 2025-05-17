@@ -26,6 +26,7 @@ from utils.logging_config_helper import get_configured_logger
 
 logger = get_configured_logger("nlweb_handler")
 
+API_VERSION = "0.1"
 
 class NLWebHandler:
 
@@ -143,6 +144,11 @@ class NLWebHandler:
                 
             if (self.streaming and self.http_handler is not None):
                 message["query_id"] = self.query_id
+                if not self.versionNumberSent:
+                    self.versionNumberSent = True
+                    version_number_message = {"message_type": "api_version", "api_version": API_VERSION}
+                  #  await self.http_handler.write_stream(version_number_message)
+                    
                 try:
                     await self.http_handler.write_stream(message)
                     logger.debug(f"Message streamed successfully")
