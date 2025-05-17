@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 # This is what you need for the JSON-LD output: @type, name, description, url
 
 default_filename = "ghrepoinfo.json"
+demo = True     # Settings for demo mode
 
 def get_all_pages(url, headers, params=None):
     results = []
@@ -31,6 +32,7 @@ def get_all_pages(url, headers, params=None):
         page += 1
     return results
 
+
 def main():
     # Set up logging
     logging.basicConfig(level=logging.INFO,
@@ -49,36 +51,29 @@ def main():
         "Accept": "application/vnd.github.v3+json"
     }
 
-    # TODO: remove this
-    #remove_later = 0
-
     # Create a new file if it does not exist
     with open(default_filename, "w") as file:
         file.write("")  # Clear the file if it exists
 
     debug_size= {}
-    i = 0
-
+    
+    # Get the repositories for the authenticated user
     repos = get_all_pages("https://api.github.com/user/repos", headers)
     logging.info(f"Found {len(repos)} repositories")
-    #all_data = []
     for repo in repos:
         owner = repo["owner"]["login"]
         name = repo["name"]
         
-        if owner == "liamca":
-            continue
-        elif owner == "MicrosoftCopilot":
-            continue
-        elif owner == "dwcares":
-            continue
-
-        if repo["visibility"] != "public":
-            continue
+        if demo:
+            # Skip repos that are not owned by the user
+            if owner != "jennifermarsman":
+                continue
+            # Skip repos that are not public
+            if repo["visibility"] != "public":
+                continue
 
         logging.info(f"Processing repo {owner}/{name}")
-
-        
+    
         # Copying over only a subset of information due to embedding model token limits
         repo_info = {
             "@type": "GithubRepository",
@@ -106,27 +101,15 @@ def main():
         }
         # TODO: it would be cool to add collaborators, branches, tags, languages, stargazers, contributors, subscribers, downloads
         
-        #repo["@type"] = "Repository"
-        #repo["name"] = repo["name"]
-        #repo["description"] = repo.get("description", "")   # TODO: give a better default description
-       # repo["url"] = repo["html_url"]
-        #owner = repo["owner"]["login"]
-        #if owner != "jennifermarsman":
-        #    continue
-        #print("Repo info: ", repo)
-        #repo_json = json.loads(repo)
-        
-        #print("repo:---------------------------------------------------------------------------")
-        #print(repo)
-        
         # Issues for this repo
         issues_url = f"https://api.github.com/repos/{owner}/{name}/issues"
         issues = get_all_pages(issues_url, headers, {"state": "all"})
         logging.info(f"Fetched {len(issues)} issues for {owner}/{name}")
 
-        # Hack for demo so we won't hit model embedding limits
-        if len(issues) > 10:
-            continue
+        # Hack for demo to stay within model embedding token limits
+        if demo:
+            if len(issues) > 10:
+                continue
         logging.info(f"Fetched {len(issues)} issues for {owner}/{name}")
 
         issues_info = []
@@ -148,13 +131,6 @@ def main():
                 "reactions": issue["reactions"],
             }
             issues_info.append(issue_info)
-            #issue["@type"] = "Issue"
-            #issue["name"] = issue["title"]
-            #issue["description"] = issue.get("body", "")
-            #issue["url"] = issue["html_url"]
-            # TODO: confirm that this is appending correctly
-            #print("issue:---------------------------------------------------------------------------")
-            #print(issue)
         repo_info["issues"] = issues_info
 
         # Pull requests for this repo  
@@ -181,44 +157,22 @@ def main():
                 "auto_merge": pull["auto_merge"],
             }
             pulls_info.append(pull_info)
-            #pull["@type"] = "PullRequest"
-            #pull["name"] = pull["title"]
-            #pull["description"] = pull.get("body", "")
-            #pull["url"] = pull["html_url"]
         repo_info["pulls"] = pulls_info
 
         key = repo_info["name"]
-        #debug_size.append(i, len(str(repo_info)))
         debug_size[key] = len(str(repo_info))
-        #print("json length: ", len(str(repo_info)))
-        i += 1
-        
-        #all_data.append({
-        #    "repo": repo,
-        #    #"issues": issues,
-        #    #"pulls": pulls
-        #})
-
-
-        # This is just for debugging, remove later
-        #with open("JenOneRepoInfo.json", "w", encoding="utf-8") as f:
-        #    json.dump(repo_info, f, indent=4)
 
         with open(default_filename, "a", encoding="utf-8") as f:
             json.dump(repo_info, f)
             f.write("\n")
 
-        #remove_later += 1
-        #if remove_later > 50:
-        #    break
-
     logging.info(f"Wrote JSON-LD output to {default_filename}")  # added
     
+    # Uncomment the following lines if you are having issues with token limits to see what the biggest repos are
     #max_value = max(debug_size.values())
     #max_keys = [key for key, value in debug_size.items() if value == max_value]
     #print("Keys with maximum value:", max_keys)
     #print("Maximum value:", max_value)
-
 
 if __name__ == "__main__":
     main()
