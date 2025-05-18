@@ -66,7 +66,7 @@ class GenerateAnswer(NLWebHandler):
             prompt_str, ans_struc = find_prompt(site, self.item_type, self.RANKING_PROMPT_NAME)
             description = trim_json_hard(json_str)
             prompt = fill_ranking_prompt(prompt_str, self, description)
-            ranking = await ask_llm(prompt, ans_struc, provider=self.handler.provider)
+            ranking = await ask_llm(prompt, ans_struc)
             ansr = {
                 'url': url,
                 'site': site,

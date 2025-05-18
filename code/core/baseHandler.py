@@ -46,9 +46,6 @@ class NLWebHandler:
         # the model that is being used
         self.model = get_param(query_params, "model", str, "gpt-4o-mini")
 
-        # the provider that is being used (required for benchmarking)
-        self.provider = get_param(query_params, "provider", str, None)
-
         # the request may provide a fully decontextualized query, in which case 
         # we don't need to decontextualize the latest query.
         self.decontextualized_query = get_param(query_params, "decontextualized_query", str, "") 
