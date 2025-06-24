@@ -1,4 +1,4 @@
-write_endpoint: qdrant_local
+write_endpoint: qdrant_url
 
 endpoints:
 
@@ -17,7 +17,7 @@ endpoints:
     db_type: azure_ai_search
 
   azure_ai_search:
-    enabled: true
+    enabled: false
     api_key_env: AZURE_VECTOR_SEARCH_API_KEY
     api_endpoint_env: AZURE_VECTOR_SEARCH_ENDPOINT
     index_name: embeddings1536
@@ -41,7 +41,7 @@ endpoints:
 
   # Option 1: Local file-based Qdrant storage
   qdrant_local:
-    enabled: true
+    enabled: false
     # Use local file-based storage with a specific path
     database_path: "../data/db"
     # Set the collection name to use
@@ -49,9 +49,9 @@ endpoints:
     # Specify the database type
     db_type: qdrant
     
-  # Option 2: Remote Qdrant server
+  # Option 2: Remote Qdrant server (Qdrant Cloud)
   qdrant_url:
-    enabled: false
+    enabled: true
     # Connect to a Qdrant server at a specific URL
     api_endpoint_env: QDRANT_URL
     # Optional API key for authentication
